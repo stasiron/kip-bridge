@@ -1,0 +1,9 @@
+node_modules/
+web/.next/
+web/out/
+*.tsbuildinfo
+bridge/dist/
+e2e/.runtime.json
+test-results/
+playwright-report/
+*.log

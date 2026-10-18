@@ -1,0 +1,17 @@
+---
+description: PlayLink codec and session rules for the Node bridge.
+globs: companion/bridge/**/*.ts
+alwaysApply: false
+---
+
+# Bridge
+
+- Ports: console UDP 9066, client listen UDP 9060, HTTP 8787. Discovery uses DDP ports 987 and 9302. `host-request-port` is not the game port.
+- Match `GameMessages.kt` field order and `encodeDefaults`. Doubles keep a decimal point (`0.0`). Unknown `TypeString` values stay unknown.
+- Select Decades magics only after `InterfaceVersion` starts with `KIP2_`.
+- Auto-replies follow `PlayLinkSession`: player id, device info, avatar status, resources, `FactCount` 63, trivia index `-1`, empty power-play choice. Do not replay a gameplay datagram after NACK or `ack_timeout`.
+- Hold one write chain per session for every datagram.
+- Join code is printed at startup and must stay out of `GET /api/status`. UDP 9060 binds only after a valid join.
+- Device strings `KIP Browser Bridge` and `Node.js <version>` are unproven on a console. Do not change the numeric device fields (`Response` 10, `DeviceSize` 2, `DeviceOS` 1, `DeviceType` Handheld) without a capture.
+
+Fixture tests read `UdpPacketFixtures.kt` from the reference tree. Do not copy that file.

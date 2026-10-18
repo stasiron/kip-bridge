@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.game.remoteclient.ui.SunburstBackgroundView
+        android:id="@+id/sunburstBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <com.game.remoteclient.ui.WhirlpoolView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Counter -->
+    <TextView
+        android:id="@+id/timerText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        android:shadowColor="#80000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="3"
+        android:background="#40000000"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="4dp"
+        android:layout_marginTop="8dp"
+        tools:text="11 to go" />
+
+    <!-- Circle 0: upper-left -->
+    <TextView
+        android:id="@+id/slot0"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:layout_gravity="start|top"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="40dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="#F0EAD6"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        tools:text="Walk" />
+
+    <!-- Circle 1: upper-right -->
+    <TextView
+        android:id="@+id/slot1"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:layout_gravity="end|top"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="32dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="#F0EAD6"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        tools:text="Way" />
+
+    <!-- Circle 2: lower-center -->
+    <TextView
+        android:id="@+id/slot2"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_marginBottom="40dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="#F0EAD6"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        tools:text="This" />
+
+    <!-- Circle 3: lower-left (only for 4+ item rounds) -->
+    <TextView
+        android:id="@+id/slot3"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:layout_gravity="start|bottom"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="#F0EAD6"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:text="One" />
+
+    <!-- Circle 4: lower-right (only for 5-item rounds) -->
+    <TextView
+        android:id="@+id/slot4"
+        android:layout_width="144dp"
+        android:layout_height="144dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="32dp"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="10sp"
+        android:autoSizeMaxTextSize="16sp"
+        android:textStyle="bold"
+        android:textColor="#009688"
+        android:background="@drawable/circle_background"
+        android:backgroundTint="#F0EAD6"
+        android:padding="12dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone"
+        tools:text="Two" />
+
+    <!-- Instruction text -->
+    <TextView
+        android:id="@+id/instructionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/drag_to_link"
+        android:textSize="16sp"
+        android:textColor="#CCFFFFFF"
+        android:background="#30000000"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="6dp" />
+
+    <!-- Feedback overlay -->
+    <FrameLayout
+        android:id="@+id/feedbackOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/circle_background"
+            android:backgroundTint="#DDFFFFFF"
+            android:padding="32dp">
+
+            <TextView
+                android:id="@+id/feedbackTopText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:gravity="center"
+                tools:text="Walk This Way" />
+
+            <TextView
+                android:id="@+id/feedbackBottomText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                tools:text="" />
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <!-- Drag line overlay -->
+    <com.game.remoteclient.ui.LinkingLineView
+        android:id="@+id/linkingLine"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</FrameLayout>

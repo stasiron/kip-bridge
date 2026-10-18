@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Big playful "x2" -->
+
+    <!-- x -->
+    <path
+        android:pathData="M18,36 L54,86 M54,36 L18,86"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="11"
+        android:strokeLineCap="round" />
+
+    <!-- 2 -->
+    <path
+        android:pathData="M64,50 A19,19 0 0,1 102,51 C102,67 84,75 64,88 L104,88"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="11"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+
+    <!-- Star sparkles -->
+    <path
+        android:pathData="M30,18 L33.5,10 L37,18 L33.5,26 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M104,30 L107,23 L110,30 L107,37 Z"
+        android:fillColor="#FFFFFF" />
+    <path
+        android:pathData="M92,102 L95,95 L98,102 L95,109 Z"
+        android:fillColor="#FFFFFF" />
+
+</vector>

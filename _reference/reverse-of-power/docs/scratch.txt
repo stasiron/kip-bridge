@@ -1,0 +1,71 @@
+{"TypeString":"ClientGameIDMessage","GameID":"2dd946595-dace-4283-9d55-22ff62b01fad"}
+
+> {"TypeString":"DeviceInfoMessage","Response":10,"DeviceSize":2,"DeviceOS":1,"DeviceModel":"Genymobile Pixel 9","DeviceType":"Handheld","DeviceUID":"b2f3f8eb0cf4ef4b2359871d35495225","DeviceOperatingSystem":"Android OS 11 / API-30 (RQ1A.210105.003/857)"}
+
+> {"TypeString":"KnowledgeIsPower.ClientRequestAvatarMessage","RequestID":"b67c9407-a4d9-463c-b63b-f96a1246e71f","AvatarID":"MAGICIAN","Request":true}
+> {"TypeString":"ClientImageResourceContentTransferMessage","TransferID":2,"ImageGUID":"7551b16c-ac64-49db-86cd-ea2f3c446a04","ImgType":2}
+> {"TypeString":"ClientPlayerProfileMessage","playerName":"player","uppercasePlayerName":"PLAYER","deviceCultureName":"en-US","playerCardId":"MAGICIAN"}
+> {"TypeString":"ClientImageResourceContentTransferMessage","TransferID":3,"ImageGUID":"7551b16c-ac64-49db-86cd-ea2f3c446a04","ImgType":2}
+
+< {"TypeString":"ImageResourceContentTransferMessage","TransferID":90,"ImageGUID":"cfe52c9b-47e0-404f-877c-1c3f687f61df","Acknowledge":true}
+< "img transfer id = 90"
+> {"TypeString":"AllResourcesReceivedMessage","Requirements":[]}
+
+
+{"TypeString":"ClientHoldingScreenCommandMessage","action":5,"time":0.0,"HoldingScreenText":"","HoldingScreenType":4,"OtherPlayerIndex":-1,"ShowPortraitPhotoControls":false}
+
+{"TypeString":"PlayerJoinedMessage","CurrentPlayerID":6,"OldPlayerID":6,"SlotID":1}
+
+{"TypeString":"PlayerNameQuizStateMessage","PlayerName":"test2","PlayerID":6}
+
+< {
+    "TypeString":"KnowledgeIsPower.ServerColourMessage",
+    "BackgroundTint": {"r":0.75,"g":0.6926470398902893,"b":0.5900735259056091,"a":1.0},
+    "PrimaryTint": {"r":0.7132352590560913,"g":0.5721794366836548,"b":0.319907009601593,"a":1.0},
+    "SecondaryTint": {"r":0.8014705777168274,"g":0.6470289826393127,"b":0.2416197955608368,"a":1.0},
+    "Rainbow":false,
+    "RoundType":-1
+}
+
+<> {"TypeString":"ImageResourceContentTransferMessage","TransferID":200,"ImageGUID":"23ac0dfa-da65-4b2a-94d9-75e870eeec4d","Acknowledge":true}
+
+> {"TypeString":"StartGameButtonPressedResponseMessage","Response":9}
+
+< {"TypeString":"ResourceRequirementsMessage","Requirements":[]}
+> {"TypeString":"AllResourcesReceivedMessage","Requirements":[]}
+
+
+< {"TypeString":"KnowledgeIsPower.ServerCategorySelectChoices","CategoryChoices":[{"DisplayText":"Movies","Colour":{"r":1.0,"g":0.7839999794960022,"b":0.47099998593330386,"a":1.0},"DoorIndex":7,"ChoiceType":8},{"DisplayText":"Music","Colour":{"r":1.0,"g":0.7839999794960022,"b":0.47099998593330386,"a":1.0},"DoorIndex":1,"ChoiceType":8},{"DisplayText":"Myths & Legends","Colour":{"r":1.0,"g":0.7839999794960022,"b":0.47099998593330386,"a":1.0},"DoorIndex":4,"ChoiceType":8},{"DisplayText":"Competitive Sports","Colour":{"r":1.0,"g":0.7839999794960022,"b":0.47099998593330386,"a":1.0},"DoorIndex":0,"ChoiceType":8}],"BackgroundTint":{"r":0.75,"g":0.6926470398902893,"b":0.5900735259056091,"a":1.0},"PrimaryTint":{"r":0.7132352590560913,"g":0.5721794366836548,"b":0.319907009601593,"a":1.0},"SecondaryTint":{"r":0.8014705777168274,"g":0.6470289826393127,"b":0.2416197955608368,"a":1.0}}
+
+> {"TypeString":"KnowledgeIsPower.ClientCategorySelectChoice","ChosenCategoryIndex":0}
+< {"TypeString":"KnowledgeIsPower.ServerRequestCategorySelectChoice"}
+< {"TypeString":"KnowledgeIsPower.ServerBeginCategorySelectOverride","DurationSeconds":15.0,"InitialCategorySelectChoice":"Hobbies","DoorIndex":4}
+
+// if we're using the category selection override, immediatelly:
+    > {"TypeString":"KnowledgeIsPower.ClientCategorySelectOverride","DurationSeconds":1.2216854095458985}
+    < {"TypeString":"KnowledgeIsPower.ServerStopCategorySelectOverride"}
+    < {"TypeString":"KnowledgeIsPower.ServerCategorySelectOverrideSuccess","CategorySelectOverrideSuccess":true,"CategorySelectOverridePlayerName":"test"}
+// OR if not, eventually just:
+    < {"TypeString":"KnowledgeIsPower.ServerStopCategorySelectOverride"}
+
+// and finally, depending on the result, boolean:
+    < {"TypeString":"KnowledgeIsPower.ClientStopCategorySelectOverrideResponse","OverrideSent":false}
+
+
+{"TypeString":"KnowledgeIsPower.ServerBeginTriviaAnsweringPhase","QuestionID":"TRV05071","QuestionText":"Everyone wanted a pair in the 00s. What are they?","QuestionDuration":15.0,"Answers":[{"DisplayIndex":0,"DisplayText":"EGGOs","IsCorrect":false},{"DisplayIndex":1,"DisplayText":"UGGs","IsCorrect":true},{"DisplayIndex":2,"DisplayText":"OWLs","IsCorrect":false},{"DisplayIndex":3,"DisplayText":"ARGHs","IsCorrect":false}],"PowerPlays":[],"PowerPlayPlayers":[{"SlotIndex":0,"Name":"Player","ImageGUID":"00000000-0000-0000-0000-000000000000","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":true,"Away":false},{"SlotIndex":1,"Name":"tablet","ImageGUID":"00000000-0000-0000-0000-000000000000","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":false,"Away":false}],"RoundType":1,"BackgroundTint":{"r":0.9647058844566345,"g":0.8235294222831726,"b":0.3450980484485626,"a":1.0},"PrimaryTint":{"r":1.0,"g":0.7529411911964417,"b":0.27450981736183169,"a":1.0},"SecondaryTint":{"r":0.7921568751335144,"g":0.658823549747467,"b":0.20000000298023225,"a":1.0}}
+
+
+{"TypeString":"KnowledgeIsPower.ClientTriviaAnswer","ChosenAnswerDisplayIndex":3,"AnswerTime":8.359296798706055,"NumBombsExploded":0,"PaintCleared":false,"IceCleared":false,"NumWrongAnswers":1,"TotalPaintLayersPerAnswer":0,"PaintLayersClearedAnswer0":0,"PaintLayersClearedAnswer1":0,"PaintLayersClearedAnswer2":0,"PaintLayersClearedAnswer3":0,"TotalIceLayersPerAnswer":5,"IceLayersClearedAnswer0":0,"IceLayersClearedAnswer1":0,"IceLayersClearedAnswer2":0,"IceLayersClearedAnswer3":5}
+
+
+{"TypeString":"KnowledgeIsPower.ServerBeginPowerPlayPhase","PowerPlays":[{"DisplayIndex":0,"PowerType":5,"PowerTarget":2,"PowerPlayTargets":[0],"New":false,"TargetCount":1},{"DisplayIndex":1,"PowerType":4,"PowerTarget":2,"PowerPlayTargets":[0],"New":false,"TargetCount":1},{"DisplayIndex":2,"PowerType":7,"PowerTarget":2,"PowerPlayTargets":[0],"New":false,"TargetCount":1}],"PowerPlayPlayers":[{"SlotIndex":0,"Name":"t","ImageGUID":"cfe52c9b-47e0-404f-877c-1c3f687f61df","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":false,"Away":false},{"SlotIndex":1,"Name":"player","ImageGUID":"7551b16c-ac64-49db-86cd-ea2f3c446a04","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":true,"Away":false}],"RoundType":1}
+
+
+{"TypeString":"KnowledgeIsPower.ServerBeginTriviaAnsweringPhase","QuestionID":"TRV01620","QuestionText":"Which Russian composer created Swan Lake, Sleeping Beauty, and The Nutcracker?","QuestionDuration":15.0,"Answers":[{"DisplayIndex":0,"DisplayText":"Tchaikovsky","IsCorrect":true},{"DisplayIndex":1,"DisplayText":"Borodin","IsCorrect":false},{"DisplayIndex":2,"DisplayText":"Sibelius","IsCorrect":false},{"DisplayIndex":3,"DisplayText":"Wagner","IsCorrect":false}],"PowerPlays":[{"PowerType":5,"Count":1,"Culprits":[0]}],"PowerPlayPlayers":[{"SlotIndex":0,"Name":"t","ImageGUID":"cfe52c9b-47e0-404f-877c-1c3f687f61df","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":false,"Away":false},{"SlotIndex":1,"Name":"player","ImageGUID":"7551b16c-ac64-49db-86cd-ea2f3c446a04","Colour":{"r":255,"g":255,"b":255,"a":255},"Self":true,"Away":false}],"RoundType":1,"BackgroundTint":{"r":1.0,"g":0.5607843399047852,"b":0.615686297416687,"a":1.0},"PrimaryTint":{"r":1.0,"g":0.3960784375667572,"b":0.4745098054409027,"a":1.0},"SecondaryTint":{"r":1.0,"g":0.3294117748737335,"b":0.40784314274787905,"a":1.0}}
+
+
+
+
+{"TypeString":"KnowledgeIsPower.ServerBeginLinkingAnsweringPhase","QuestionID":"LNK00086","QuestionText":"Link the words to make famous book titles","QuestionDuration":35.0,"LinkingAnswers":[{"DisplayText":"Winnie The ___","AnswerID":"LNK00086_AnswerA01","MatchIndex":1,"Direction":1},{"DisplayText":"Pooh","AnswerID":"LNK00086_AnswerB01","MatchIndex":0,"Direction":2},{"DisplayText":"Bridget Jones ___","AnswerID":"LNK00086_AnswerA02","MatchIndex":4,"Direction":1},{"DisplayText":"Web","AnswerID":"LNK00086_AnswerB03","MatchIndex":10,"Direction":2},{"DisplayText":"Diary","AnswerID":"LNK00086_AnswerB02","MatchIndex":2,"Direction":2},{"DisplayText":"Wrath","AnswerID":"LNK00086_AnswerB04","MatchIndex":8,"Direction":2},{"DisplayText":"Of Mice And ___","AnswerID":"LNK00086_AnswerA05","MatchIndex":7,"Direction":1},{"DisplayText":"Men","AnswerID":"LNK00086_AnswerB05","MatchIndex":6,"Direction":2},{"DisplayText":"The Grapes Of ___","AnswerID":"LNK00086_AnswerA04","MatchIndex":5,"Direction":1},{"DisplayText":"The Wind In The ___","AnswerID":"LNK00086_AnswerA06","MatchIndex":11,"Direction":1},{"DisplayText":"Charlottes ___","AnswerID":"LNK00086_AnswerA03","MatchIndex":3,"Direction":1},{"DisplayText":"Willows","AnswerID":"LNK00086_AnswerB06","MatchIndex":9,"Direction":2},{"DisplayText":"Rings","AnswerID":"LNK00086_AnswerB07","MatchIndex":14,"Direction":2},{"DisplayText":"Crime And ___","AnswerID":"LNK00086_AnswerA08","MatchIndex":15,"Direction":1},{"DisplayText":"The Lord Of The ___","AnswerID":"LNK00086_AnswerA07","MatchIndex":12,"Direction":1},{"DisplayText":"Punishment","AnswerID":"LNK00086_AnswerB08","MatchIndex":13,"Direction":2},{"DisplayText":"The Lovely ___","AnswerID":"LNK00086_AnswerA09","MatchIndex":17,"Direction":1},{"DisplayText":"Bones","AnswerID":"LNK00086_AnswerB09","MatchIndex":16,"Direction":2},{"DisplayText":"Factory","AnswerID":"LNK00086_AnswerB10","MatchIndex":24,"Direction":2},{"DisplayText":"The Very Hungry ___","AnswerID":"LNK00086_AnswerA11","MatchIndex":20,"Direction":1},{"DisplayText":"Caterpillar","AnswerID":"LNK00086_AnswerB11","MatchIndex":19,"Direction":2},{"DisplayText":"The Lion, The Witch And The ___","AnswerID":"LNK00086_AnswerA12","MatchIndex":22,"Direction":1},{"DisplayText":"Wardrobe","AnswerID":"LNK00086_AnswerB12","MatchIndex":21,"Direction":2},{"DisplayText":"The Little ___","AnswerID":"LNK00086_AnswerA13","MatchIndex":27,"Direction":1},{"DisplayText":"Charlie And The Chocolate ___","AnswerID":"LNK00086_AnswerA10","MatchIndex":18,"Direction":1},{"DisplayText":"The Cat In The ___","AnswerID":"LNK00086_AnswerA14","MatchIndex":28,"Direction":1},{"DisplayText":"The Secret ___","AnswerID":"LNK00086_AnswerA15","MatchIndex":29,"Direction":1},{"DisplayText":"Prince","AnswerID":"LNK00086_AnswerB13","MatchIndex":23,"Direction":2},{"DisplayText":"Hat","AnswerID":"LNK00086_AnswerB14","MatchIndex":25,"Direction":2},{"DisplayText":"Garden","AnswerID":"LNK00086_AnswerB15","MatchIndex":26,"Direction":2}]}
+{"TypeString":"KnowledgeIsPower.ClientLinkingAnswer","ClientLinkingCorrectAnswerCount":13,"ClientAnswers":[{"FromID":"LNK00086_AnswerA01","ToID":"LNK00086_AnswerB01","Correct":true},{"FromID":"LNK00086_AnswerA02","ToID":"LNK00086_AnswerB02","Correct":true},{"FromID":"LNK00086_AnswerA05","ToID":"LNK00086_AnswerB05","Correct":true},{"FromID":"LNK00086_AnswerA04","ToID":"LNK00086_AnswerB04","Correct":true},{"FromID":"LNK00086_AnswerA06","ToID":"LNK00086_AnswerB03","Correct":false},{"FromID":"LNK00086_AnswerA03","ToID":"LNK00086_AnswerB03","Correct":true},{"FromID":"LNK00086_AnswerA06","ToID":"LNK00086_AnswerB06","Correct":true},{"FromID":"LNK00086_AnswerA08","ToID":"LNK00086_AnswerB08","Correct":true},{"FromID":"LNK00086_AnswerA07","ToID":"LNK00086_AnswerB07","Correct":true},{"FromID":"LNK00086_AnswerA09","ToID":"LNK00086_AnswerB09","Correct":true},{"FromID":"LNK00086_AnswerA11","ToID":"LNK00086_AnswerB10","Correct":false},{"FromID":"LNK00086_AnswerA12","ToID":"LNK00086_AnswerB10","Correct":false},{"FromID":"LNK00086_AnswerA12","ToID":"LNK00086_AnswerB11","Correct":false},{"FromID":"LNK00086_AnswerA11","ToID":"LNK00086_AnswerB10","Correct":false},{"FromID":"LNK00086_AnswerA11","ToID":"LNK00086_AnswerB11","Correct":true},{"FromID":"LNK00086_AnswerA12","ToID":"LNK00086_AnswerB12","Correct":true},{"FromID":"LNK00086_AnswerA13","ToID":"LNK00086_AnswerB10","Correct":false},{"FromID":"LNK00086_AnswerA10","ToID":"LNK00086_AnswerB10","Correct":true},{"FromID":"LNK00086_AnswerA15","ToID":"LNK00086_AnswerB13","Correct":false},{"FromID":"LNK00086_AnswerA13","ToID":"LNK00086_AnswerB13","Correct":true}]}
+

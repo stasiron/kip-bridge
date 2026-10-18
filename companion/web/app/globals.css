@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ink: #07141f;
+  --panel: #0c1c2a;
+  --teal: #14b8a6;
+  --coral: #fb7185;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  font-family: var(--font-body), "IBM Plex Sans", ui-sans-serif, sans-serif;
+  background:
+    radial-gradient(120% 70% at 50% -20%, rgba(20, 184, 166, 0.16), transparent 55%),
+    linear-gradient(165deg, #07141f 0%, #0c1c2a 45%, #122433 100%);
+  background-attachment: fixed;
+}
+
+.font-display {
+  font-family: var(--font-display), Fraunces, ui-serif, Georgia, serif;
+}
+
+button,
+input {
+  border-radius: 0;
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .min-h-dvh {
+    min-height: 100dvh;
+  }
+}

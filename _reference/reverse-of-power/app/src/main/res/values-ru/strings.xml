@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Знание — сила</string>
+
+    <!-- Server Discovery -->
+    <string name="server_discovery_title">Поиск игрового сервера</string>
+    <string name="enter_ip_address">Введите IP-адрес</string>
+    <string name="ip_address_hint">192.168.1.100</string>
+    <string name="connect_button">Подключиться</string>
+    <string name="discovered_servers">Найденные серверы</string>
+    <string name="scanning">Поиск серверов…</string>
+    <string name="no_servers_found">Серверы не найдены</string>
+
+    <!-- Name Entry -->
+    <string name="enter_name_title">Как вас зовут?</string>
+    <string name="name_hint">Введите ваше имя</string>
+    <string name="continue_button">Продолжить</string>
+
+    <!-- Avatar Selection -->
+    <string name="avatar_selection_title">Выберите аватар</string>
+    <string name="use_camera">Использовать камеру</string>
+    <string name="choose_avatar">Выбрать аватар</string>
+    <string name="camera_permission_required">Требуется разрешение на использование камеры</string>
+    <string name="capture_photo">Сделать фото</string>
+    <string name="retake_photo">Переснять</string>
+    <string name="use_this_photo">Использовать это фото</string>
+
+    <!-- Waiting Room -->
+    <string name="waiting_room_title">Комната ожидания</string>
+    <string name="players_joined">Игроки:</string>
+    <string name="start_game">Начать игру</string>
+    <string name="waiting_for_players">Ожидание подключения игроков…</string>
+    <string name="you">Вы</string>
+
+    <!-- Get Ready -->
+    <string name="get_ready">Приготовьтесь!</string>
+    <string name="game_starting">Игра скоро начнётся…</string>
+
+    <!-- Quiz Screen -->
+    <string name="question_placeholder">Здесь появится вопрос</string>
+    <string name="answer_a">Ответ A</string>
+    <string name="answer_b">Ответ B</string>
+    <string name="answer_c">Ответ C</string>
+    <string name="answer_d">Ответ D</string>
+
+    <!-- Common -->
+    <string name="error_connection">Ошибка подключения</string>
+    <string name="error_server_unreachable">Не удаётся подключиться к серверу</string>
+    <string name="cancel">Отмена</string>
+    <string name="ok">ОК</string>
+
+    <!-- Power Plays -->
+    <string name="pp_freeze_name">ЗАМОРОЗКА</string>
+    <string name="pp_freeze_desc">Заковать ответы в лёд</string>
+    <string name="pp_bombs_name">БОМБЁЖКИ</string>
+    <string name="pp_bombs_desc">Забросать ответы бомбами</string>
+    <string name="pp_munchers_name">ОБЖОРЫ</string>
+    <string name="pp_munchers_desc">Объедают ответы</string>
+    <string name="pp_gloop_name">СЛИЗЬ</string>
+    <string name="pp_gloop_desc">Залить ответы слизью</string>
+    <string name="pp_double_trouble_name">ДВОЙНАЯ БЕДА</string>
+    <string name="pp_dt_freeze_gloop_desc">Заморозка и слизь</string>
+    <string name="pp_dt_freeze_bombs_desc">Заморозка и бомбы</string>
+    <string name="pp_dt_munchers_gloop_desc">Обжоры и слизь</string>
+    <string name="pp_lockdown_name">БЛОКИРОВКА</string>
+    <string name="pp_lockdown_desc">Заблокировать ответы</string>
+    <string name="pp_zippers_name">МОЛНИИ</string>
+    <string name="pp_zippers_desc">Застегнуть ответы</string>
+    <string name="pp_bug_name">ЖУКИ</string>
+    <string name="pp_bug_desc">Жуки ползают по ответам</string>
+    <string name="pp_letter_scatter_name">РАЗБРОС БУКВ</string>
+    <string name="pp_letter_scatter_desc">Разбросать буквы</string>
+    <string name="pp_disco_name">ДИСКО-АД</string>
+    <string name="pp_disco_desc">Диско-огни слепят экран</string>
+    <string name="pp_fifty_fifty_name">50/50</string>
+    <string name="pp_fifty_fifty_desc">Убрать половину ответов</string>
+    <string name="pp_points_doubler_name">УДВОЕНИЕ</string>
+    <string name="pp_points_doubler_desc">Вы получаете ×2 призовых очков</string>
+    <string name="pp_points_party_name">ВЕЧЕРИНКА</string>
+    <string name="pp_points_party_desc">Победители получают двойной выигрыш</string>
+    <string name="pp_locked_in">✓ Готово!</string>
+    <string name="pp_everyone">Все</string>
+    <string name="pp_unknown_name">СПЕЦХОД #%1$d</string>
+    <string name="pp_unknown_desc">Запомните эффект и сообщите разработчикам</string>
+
+    <!-- Trivia -->
+    <string name="dont_touch_bombs">Не трогайте бомбы!</string>
+
+    <!-- Server Discovery (extra) -->
+    <string name="debug">Отладка</string>
+    <string name="rescan">Повторить поиск</string>
+    <string name="manual_ip_address">Ввести IP вручную</string>
+    <string name="enter_ip_prompt">Введите IP-адрес</string>
+    <string name="scan_failed">Сбой поиска: %1$s</string>
+    <string name="failed_to_connect">Не удалось подключиться к %1$s</string>
+    <string name="connection_error_detail">Ошибка подключения: %1$s</string>
+
+    <!-- Name Entry (extra) -->
+    <string name="default_player_name">Игрок</string>
+    <string name="name_required">Введите ваше имя</string>
+    <string name="name_too_short">Имя должно быть не короче 2 символов</string>
+
+    <!-- Avatar / Camera -->
+    <string name="select_avatar_type">Выберите тип аватара</string>
+    <string name="waiting_for_avatars">Ожидание аватаров…</string>
+    <string name="select_avatar">Выбрать аватар</string>
+    <string name="avatar_unavailable">Аватар недоступен</string>
+    <string name="take_photo_first">Сначала сделайте фото</string>
+    <string name="pick_avatar_first">Сначала выберите аватар</string>
+    <string name="photo_capture_failed">Не удалось сделать фото: %1$s</string>
+
+    <!-- Category / Continue / Power Pick / Power Play -->
+    <string name="choose_a_category">ВЫБЕРИТЕ КАТЕГОРИЮ</string>
+    <string name="continue_caps">ПРОДОЛЖИТЬ</string>
+    <string name="category_selected">КАТЕГОРИЯ ВЫБРАНА</string>
+    <string name="power_pick">СУПЕРВЫБОР</string>
+    <string name="power_pick_description">Используйте Супервыбор раз за игру,\nчтобы переопределить выбор остальных</string>
+    <string name="power_pick_accepted">Супервыбор принят!</string>
+    <string name="pick_a_power_play">ВЫБЕРИТЕ СПЕЦХОД</string>
+
+    <!-- Minigame prompts -->
+    <string name="smash_odd_one_out">Нажмите, чтобы разбить лишнее</string>
+    <string name="drag_to_link">Перетащите, чтобы связать ответы</string>
+    <string name="swipe_to_match">Проведите для поиска, нажмите для пары</string>
+    <string name="finals_warning">Финал! Неверные ответы отклоняются!</string>
+
+    <!-- Waiting Room (extra) -->
+    <string name="waiting_for_other_players">Ожидание других игроков…</string>
+    <string name="hold_to_start">Удерживайте для старта!</string>
+    <string name="hold_to_start_hint">Нажмите и удерживайте, пока не загорятся все огни</string>
+
+    <!-- Player list -->
+    <string name="host">ХОСТ</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_captured_photo">Сделанное фото</string>
+    <string name="cd_expand">Развернуть</string>
+    <string name="cd_avatar_icon">Значок аватара</string>
+    <string name="cd_power_play_icon">Значок спецхода</string>
+
+    <!-- In-code UI strings (second i18n pass) -->
+    <string name="connecting_to_server">Подключение к серверу…</string>
+    <string name="avatar_selected">Выбран</string>
+    <string name="avatar_available">Доступен</string>
+    <string name="avatar_taken">Занят</string>
+    <string name="take_photo">Сделать фото</string>
+    <string name="x_to_go">Осталось %1$s</string>
+    <string name="look_at_tv">Смотрите на ТВ</string>
+    <string name="drag_to_link_in_order">Перетащите, чтобы соединить по порядку</string>
+    <string name="done_waiting">Готово, ждём других игроков</string>
+    <string name="choose_a_target">ВЫБЕРИТЕ ЦЕЛЬ</string>
+    <string name="start_caps">СТАРТ</string>
+</resources>

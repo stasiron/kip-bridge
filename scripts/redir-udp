@@ -1,0 +1,8 @@
+#!/bin/bash
+PORT="${1:-9060}"
+token="$(cat ~/.emulator_console_auth_token)"
+# expose android emulator port to localhost
+printf "auth $token\nredir add udp:${PORT}:${PORT}\nredir list\nexit\n" | nc localhost 5554
+
+# listen all intefaces and proxy localhost, since that's where the server responds to
+socat -d -x UDP4-LISTEN:${PORT},reuseaddr,fork UDP4:127.0.0.1:${PORT}

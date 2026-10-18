@@ -1,0 +1,13 @@
+---
+description: Mobile controller UI constraints for the static page.
+globs: companion/web/**/*.{ts,tsx,css}
+alwaysApply: false
+---
+
+# Controller
+
+- Screens render bridge events and `bridge.snapshot` only. The page does not encode PlayLink packets.
+- If `GET /api/status` is missing or is not `kip-browser-bridge`, show the landing page. Do not hardcode a LAN address.
+- Portrait path is `<input type="file" accept="image/*" capture="user">` plus a canvas JPEG. `http://192.168.x.x` is not a secure context, so do not call `getUserMedia` or Wake Lock.
+- Keep controls usable in a portrait phone viewport. Playwright covers WebKit with the iPhone 13 device profile.
+- Target iOS Safari and Android Chrome through the same static export. Do not add a native wrapper.

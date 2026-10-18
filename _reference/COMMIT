@@ -1,0 +1,8 @@
+repository: https://github.com/synchrone/reverse-of-power
+branch: main
+commit: e9543047cd73cd93e1cbc59313a91f0f2c0f68cc
+committer_date: 2026-06-20T17:35:08Z
+subject: docs: document power-play targeting semantics and Decades power types
+license: GPL-3.0
+acquired: snapshot zip (git executable not available on this machine)
+readonly: do not modify

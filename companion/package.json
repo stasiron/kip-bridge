@@ -1,0 +1,27 @@
+{
+  "name": "kip-browser",
+  "private": true,
+  "license": "GPL-3.0-only",
+  "workspaces": [
+    "web",
+    "bridge"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "typecheck": "npm run typecheck -w kip-browser-web && npm run typecheck -w kip-browser-bridge",
+    "lint": "npm run lint -w kip-browser-web",
+    "test": "npm run test -w kip-browser-bridge",
+    "build": "npm run build -w kip-browser-web",
+    "start": "npm run start -w kip-browser-bridge",
+    "check": "npm run typecheck && npm test && npm run build",
+    "test:e2e": "npm run build && playwright test",
+    "test:e2e:install": "playwright install --with-deps chromium webkit",
+    "verify": "node scripts/verify.mjs",
+    "bridge:smoke": "node --experimental-strip-types scripts/bridge-smoke.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1"
+  }
+}

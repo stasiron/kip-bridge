@@ -1,0 +1,21 @@
+Knowledge Is Power browser companion
+License: GNU General Public License version 3 only. See LICENSE.
+
+This program is a derivative of Reverse of Power:
+  https://github.com/synchrone/reverse-of-power
+  commit e9543047cd73cd93e1cbc59313a91f0f2c0f68cc
+  license: GPL-3.0
+
+The companion reimplements the client side of the protocol for a browser
+and a local bridge. It does not modify the upstream Kotlin sources.
+A read-only snapshot of that commit is stored in ../_reference/reverse-of-power.
+The file ../_reference/COMMIT records how the snapshot was taken.
+
+This project is not affiliated with, sponsored by, or endorsed by
+Sony Interactive Entertainment or Wish Studios. It contains none of
+their game assets, photo masks, sounds, or trademarks as creative works.
+Names of the games are used only to state compatibility.
+
+The bridge opens a PlayLink UDP session when a browser joins. The web page
+draws the controller from console events over the bridge API. The Kotlin
+tree is untouched.

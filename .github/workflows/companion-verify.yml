@@ -1,0 +1,36 @@
+name: Companion verify
+
+on:
+  push:
+    paths:
+      - "companion/**"
+      - ".github/workflows/companion-verify.yml"
+  pull_request:
+    paths:
+      - "companion/**"
+      - ".github/workflows/companion-verify.yml"
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: companion
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: companion/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Verify
+        run: npm run verify

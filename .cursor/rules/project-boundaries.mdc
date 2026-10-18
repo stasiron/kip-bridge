@@ -1,0 +1,18 @@
+---
+description: Preserve the Reverse of Power snapshot, GPL terms, and local-only play path.
+alwaysApply: true
+---
+
+# Boundaries
+
+- Browser features go in `companion/`. Do not edit `_reference/` or `app/` (byte-identical upstream snapshot, commit `e9543047cd73cd93e1cbc59313a91f0f2c0f68cc`).
+- License is GPL-3.0-only. Keep `companion/LICENSE` and `companion/NOTICE`. Do not add Sony or Wish Studios assets.
+- The phone talks to the Windows bridge over same-origin HTTP and WebSocket. The bridge is the only PlayLink UDP endpoint. Do not put UDP, WebTransport, or WebRTC to the console in the page.
+- Do not add a database, cloud relay, or account system. The Vercel export is a launcher only. Do not delete it while doing local work.
+- One host IPv4 and UDP port 9060 is one browser player.
+- Say PlayStation play is unverified until `companion/docs/real-device-test.md` records a hardware PASS.
+- Do not reset git, delete uncommitted files, or publish.
+
+```text
+Phone  --http/ws :8787-->  bridge  --udp :9066 / listen :9060-->  PlayStation
+```
