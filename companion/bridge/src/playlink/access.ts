@@ -8,6 +8,11 @@ export function normalizeIp(value: string): string {
   return value.startsWith("::ffff:") ? value.slice("::ffff:".length) : value;
 }
 
+export function isLoopbackAddress(value: string): boolean {
+  const address = normalizeIp(value);
+  return address === "127.0.0.1" || address === "::1";
+}
+
 /** Loopback, RFC1918, and link-local. Public addresses are rejected. */
 export function isLocalNetworkAddress(value: string): boolean {
   const address = normalizeIp(value);

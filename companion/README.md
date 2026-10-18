@@ -1,84 +1,58 @@
 # Knowledge Is Power browser companion
 
-Local-network bridge so an iPhone can play the original **Knowledge is Power** from Safari, next to Android phones running [Reverse of Power](https://github.com/synchrone/reverse-of-power).
+A Windows program and a mobile web page for the original **Knowledge is Power** PlayLink game. The phone never speaks UDP. The PC bridge does.
 
-The bridge speaks PlayLink. The static page it serves is the mobile controller. A join code printed at startup is required before UDP 9060 opens.
+**A real PS4 or PS5 has not been tested with this bridge.** Automated tests use captured fixtures and a simulator. Do not treat a green test run as console compatibility.
 
-**Real PS4/PS5 play is UNVERIFIED until you complete `docs/real-device-test.md`.** Automated tests use fixtures + `ConsoleSimulator` + Playwright only.
+License: GPL-3.0-only. See `LICENSE` and `NOTICE`. Derived from [Reverse of Power](https://github.com/synchrone/reverse-of-power) commit `e9543047cd73cd93e1cbc59313a91f0f2c0f68cc`. No Sony or Wish Studios assets.
 
-## Reference
+## Play (Windows, no Node.js install)
 
-| | |
-| --- | --- |
-| Upstream | https://github.com/synchrone/reverse-of-power |
-| Commit | `e9543047cd73cd93e1cbc59313a91f0f2c0f68cc` |
-| Snapshot | `../_reference/reverse-of-power` (read-only) |
-| License | GPL-3.0-only — see `LICENSE`, `NOTICE` |
-
-## Windows quick start
-
-1. Install [Node.js 22+](https://nodejs.org/).
-2. Open PowerShell:
+1. On a PC that has the source, run:
 
 ```powershell
-cd path\to\reverse of power\companion
+cd companion
 npm install
-npm run build
-.\scripts\start-bridge.ps1
+npm run package:win
 ```
 
-Or double-click `scripts\start-bridge.cmd`.
+2. Unzip `companion/release/KIP-Bridge-windows.zip`, or open the folder `companion/release/KIP-Bridge`.
+3. Double-click `KIP-Bridge.exe`.
+4. If Windows Firewall asks, allow it on **Private** networks (TCP **8787**, and UDP **9060** after a phone joins).
+5. Read the **join code** in the window. Scan a QR code with the phone, or type one of the `http://` addresses into Safari or Chrome.
+6. On the phone, enter the join code. Discover the console, or type its IP (Settings, Network). Pick a name and an avatar.
+7. Close the bridge window to stop. UDP 9060 stays closed until the join code is accepted.
 
-3. Copy the **Join code** from the terminal.
-4. On the iPhone (same Wi‑Fi as the PC and PlayStation), open one of the printed `http://192.168.x.x:8787/` URLs in **Safari**.
-5. Enter the join code, console IP (discover or type), name, avatar. Play.
+The QR code contains only the page URL. The join code is printed on the PC and on `http://127.0.0.1:8787/host`. It is not in `GET /api/status`.
 
-### Firewall
+One PC IPv4 address can carry one browser player. A second phone needs another address on the PC. This program does not change Windows network settings. Details: `docs/multiplayer.md`.
 
-Allow **Node.js** on Private networks:
+Guest Wi-Fi and client isolation hide the PC from the phone. Wake a sleeping console, then type its IP if Discover stays empty.
 
-- TCP **8787** (page + WebSocket)
-- UDP **9060** (PlayLink receive; binds after join)
+## Developer commands
 
-### Discovery troubleshooting
+Requires Node.js 22 or newer. From `companion/`:
 
-- Guest Wi‑Fi / client isolation: phone cannot reach PC — use a normal LAN.
-- Asleep consoles may not answer discovery — type the PS IP manually (Settings → System → console IP).
-- Game port stays **9066** (not `host-request-port` from DDP).
-- Vercel HTTPS page **cannot** join — mixed content blocks LAN WebSockets.
+| Command | What it does |
+| --- | --- |
+| `npm test` | Protocol fixtures, simulator sessions, host page, QR |
+| `npm run typecheck` | Web and bridge TypeScript |
+| `npm run verify` | Typecheck, tests, production build, Playwright (Chromium and WebKit), dev-server smoke |
+| `npm run package:win` | Portable Windows folder and zip. Windows only |
+| `npm run test:exe` | Starts `KIP-Bridge.exe`, checks the page, the host QR, and that UDP 9060 is still free |
+| `npm start` | Dev bridge on port 8787. Needs `npm run build` first |
 
-### Multiple iPhones
-
-One PC IPv4 + UDP 9060 = **one** browser player. For a second Safari client, add another IPv4 on the host and restart the bridge so the endpoint pool includes it. Android RoP phones keep using their own addresses.
-
-### QR / convenient URL
-
-Encode `http://<pc-lan-ip>:8787/` as a QR. Do not encode the Vercel URL for gameplay.
-
-## Verify (automated)
-
-```powershell
-npm run test:e2e:install   # once
-npm run verify
-```
-
-`npm run verify` runs typecheck, lint (tsc), unit/protocol tests, production build, Playwright (Chromium + WebKit), and a bridge cold-start smoke. It fails on any error.
-
-## Vercel
-
-`web/` is a static export (`output: "export"`). Deploy `companion/web` with `vercel.json` (build → `out`). That site is a **launcher** only — it explains how to open the local bridge. It does not talk to the console.
+`npm run verify` does not build the exe. Run `npm run test:exe` after `npm run package:win`.
 
 ## Layout
 
 ```
 companion/
-  bridge/     PlayLink UDP + HTTP/WS API
-  web/        Next.js static controller + landing
-  e2e/        Playwright + simulator harness
-  scripts/    verify, bridge smoke, Windows start
-  docs/       architecture, protocol, verification, real-device-test
+  bridge/     PlayLink UDP, HTTP, WebSocket, host page
+  web/        Mobile controller
+  e2e/        Playwright against ConsoleSimulator
+  scripts/    verify, package-win, exe smoke
+  release/    Generated folder and zip (not committed)
 ```
 
-## License
-
-GNU GPL version 3 only. Derivative of Reverse of Power. Not affiliated with Sony Interactive Entertainment or Wish Studios. No proprietary game assets.
+The public Vercel export is still only a launcher. Gameplay is the LAN URL from the bridge.

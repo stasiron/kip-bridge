@@ -1,10 +1,10 @@
 import { randomInt, timingSafeEqual } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
-import path from "node:path";
 import { WebSocketServer, type WebSocket } from "ws";
 import { PLAYLINK_SERVER_PORT, SESSION_PATH } from "./config.ts";
-import { isDottedIpv4, isLocalNetworkAddress } from "./playlink/access.ts";
+import { renderHostPage } from "./host-page.ts";
+import { isDottedIpv4, isLocalNetworkAddress, isLoopbackAddress } from "./playlink/access.ts";
 import { discoverConsoles } from "./playlink/discovery.ts";
 import { EndpointPool, lanIpv4Addresses } from "./playlink/pool.ts";
 import { PlayLinkSession, type SessionEvent } from "./playlink/session.ts";
@@ -12,8 +12,8 @@ import { MESSAGE_CATALOG } from "./protocol/catalog.ts";
 import { MESSAGE_FIELDS } from "./protocol/schema.ts";
 import { bridgeStatus, type BridgeStatus } from "./status.ts";
 import { contentType, resolveStatic } from "./static-files.ts";
+import { resolveWebRoot } from "./web-root.ts";
 
-const webOut = path.resolve(import.meta.dirname, "../../web/out");
 const PORTRAIT_LIMIT = 400_000;
 const JOIN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
@@ -25,6 +25,7 @@ export interface BridgeOptions {
   ackTimeoutMs?: number;
   detachGraceMs?: number;
   discoverTimeoutMs?: number;
+  webRoot?: string;
 }
 
 export interface BridgeHandle {
@@ -49,6 +50,7 @@ export function createJoinCode(): string {
 export function createBridge(options: BridgeOptions = {}): BridgeHandle {
   const endpoints = options.endpoints ?? lanIpv4Addresses();
   const pool = new EndpointPool(endpoints);
+  const webOut = options.webRoot ?? resolveWebRoot();
   const joinCode = options.joinCode ?? createJoinCode();
   const sessions = new Map<string, ManagedSession>();
   const socketSession = new WeakMap<WebSocket, ManagedSession>();
@@ -73,6 +75,26 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
       sendJson(res, 200, status());
       return;
     }
+    if ((req.method === "GET" || req.method === "HEAD") && url.pathname === "/host") {
+      if (!isLoopbackAddress(remote)) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store" });
+        res.end(req.method === "HEAD" ? undefined : "Not found\n");
+        return;
+      }
+      const port = req.socket.localPort ?? 0;
+      const html = renderHostPage({
+        joinCode,
+        urls: lanIpv4Addresses().map((address) => `http://${address}:${port}/`),
+        status: status(),
+      });
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Cache-Control": "no-store",
+        "X-Content-Type-Options": "nosniff",
+      });
+      res.end(req.method === "HEAD" ? undefined : html);
+      return;
+    }
     if (req.method !== "GET" && req.method !== "HEAD") {
       sendJson(res, 405, { error: "method_not_allowed" });
       return;
@@ -82,7 +104,7 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
       res.end("Frontend export is missing. From the companion directory run: npm run build\n");
       return;
     }
-    const file = locateFile(url.pathname);
+    const file = locateFile(webOut, url.pathname);
     if (!file) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
       res.end("Not found\n");
@@ -468,12 +490,12 @@ function sendJson(res: http.ServerResponse, statusCode: number, body: unknown): 
   res.end(payload);
 }
 
-function locateFile(urlPath: string): string | null {
-  const resolved = resolveStatic(webOut, urlPath);
+function locateFile(root: string, urlPath: string): string | null {
+  const resolved = resolveStatic(root, urlPath);
   if (!resolved || !fs.existsSync(resolved)) return null;
   const stat = fs.statSync(resolved);
   if (stat.isDirectory()) {
-    const index = resolveStatic(webOut, `${urlPath.replace(/\/?$/, "/")}`);
+    const index = resolveStatic(root, `${urlPath.replace(/\/?$/, "/")}`);
     if (!index || !fs.existsSync(index) || !fs.statSync(index).isFile()) return null;
     return index;
   }

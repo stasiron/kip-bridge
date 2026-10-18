@@ -302,4 +302,73 @@ test.describe("mission scenarios A–L (simulator)", () => {
       timeout: 5_000,
     });
   });
+
+  test("decades screens accept an answer on the simulator", async ({ page }) => {
+    await waitForFreeEndpoint(1);
+    await joinPage(page, { name: "Dee", avatar: "COWGIRL" });
+
+    await sendConsole({
+      TypeString: "KnowledgeIsPower.ServerBeginOrderingAnsweringPhase",
+      ChallengeId: "ord-1",
+      QuestionText: "Order decades",
+      QuestionDuration: 30,
+      OrderingAnswerData: [{ WordsInCorrectOrder: ["Alpha", "Beta"], LayoutId: 0 }],
+    });
+    await expect(page.getByRole("heading", { name: "Ordering" })).toBeVisible();
+    await page.getByRole("button", { name: "Alpha", exact: true }).click();
+    await page.getByRole("button", { name: "Beta", exact: true }).click();
+    await page.getByRole("button", { name: "Submit order" }).click();
+    await expect
+      .poll(async () =>
+        (await clientMessages())?.messages?.some((m) => m.TypeString === "KnowledgeIsPower.ClientToServerOrderingAnswer"),
+      )
+      .toBeTruthy();
+
+    await sendConsole({
+      TypeString: "KnowledgeIsPower.ServerBeginEliminatingAnsweringPhase",
+      ChallengeId: "elim-1",
+      QuestionText: "Drop one",
+      QuestionDuration: 30,
+      EliminatingAnswerData: [
+        { CorrectInfo: "keep", IncorrectInfo: "drop", CorrectAnswer: "Keep", IncorrectAnswers: ["Drop"] },
+      ],
+    });
+    await expect(page.getByRole("heading", { name: "Elimination" })).toBeVisible();
+    await page.getByRole("button", { name: "Keep", exact: true }).click();
+    await expect
+      .poll(async () =>
+        (await clientMessages())?.messages?.some((m) => m.TypeString === "KnowledgeIsPower.ClientToServerEliminatingAnswer"),
+      )
+      .toBeTruthy();
+
+    await sendConsole({
+      TypeString: "KnowledgeIsPower.ServerBeginMissingLetterAnsweringPhase",
+      ChallengeId: "letter-1",
+      Question: "Letter",
+      QuestionDuration: 30,
+      MissingLetterAnswerData: [{ answerInfo: "info", correct: "A", letters: "AB", finalDisplay: "_B" }],
+    });
+    await expect(page.getByRole("heading", { name: "Missing letter" })).toBeVisible();
+    await page.getByRole("button", { name: "A", exact: true }).click();
+    await expect
+      .poll(async () =>
+        (await clientMessages())?.messages?.some(
+          (m) => m.TypeString === "KnowledgeIsPower.PrototypeClientToServerMissingLetterAnswer",
+        ),
+      )
+      .toBeTruthy();
+
+    await sendConsole({
+      TypeString: "KnowledgeIsPower.ServerBeginMatchingAnsweringPhase",
+      ChallengeId: "match-1",
+      QuestionDuration: 30,
+      MatchingData: [{ QuestionText: "MatchQ", AnswerText: "MatchA" }],
+      DummyAnswerData: ["Nope"],
+    });
+    await expect(page.getByRole("heading", { name: "Matching" })).toBeVisible();
+    await expect(page.getByText("MatchQ")).toBeVisible();
+    await page.getByRole("button", { name: "MatchA", exact: true }).click();
+    await expect(page.getByText("Matching complete")).toBeVisible();
+    await disconnectIfPossible(page);
+  });
 });

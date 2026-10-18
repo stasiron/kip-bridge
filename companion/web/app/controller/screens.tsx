@@ -54,7 +54,7 @@ export function ConnectScreen({ session }: { session: BridgeSession }) {
     <Shell>
       <p className="text-xs font-semibold uppercase tracking-[0.18em] text-teal-300">Knowledge Is Power</p>
       <Title>Connect</Title>
-      <Sub>Discover a console on this LAN, or enter its IP. Join code is printed by the bridge process — not by this page.</Sub>
+      <Sub>Discover a console on this Wi-Fi, or type its IP from the PlayStation network settings. The join code is on the PC bridge window. This page does not show it.</Sub>
 
       <div className="mt-4 flex flex-wrap gap-2">
         <StatusChip>WS {session.socketOpen ? "open" : "closed"}</StatusChip>
@@ -92,7 +92,9 @@ export function ConnectScreen({ session }: { session: BridgeSession }) {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-slate-400">Awake consoles only. Asleep boxes need a manual IP.</p>
+          <p className="text-sm text-slate-400">
+            Awake consoles only. If the list stays empty, wake the PlayStation and type its IP. Guest Wi-Fi can block the phone from the PC even when the PC can see the console.
+          </p>
         )}
       </Panel>
 

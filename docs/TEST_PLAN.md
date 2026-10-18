@@ -64,9 +64,7 @@ Required flows: status flags, join, name, avatar, lobby, holding, continue, cate
 
 ## Windows executable
 
-No packaging test exists, because no executable exists.
-
-When an executable is produced, the smoke test must start it without a separate `npm install`, read a join code from stdout, open `/api/status` and confirm the code is absent, fetch `/`, and confirm UDP 9060 is unbound until a join. Run that smoke on Windows. Do not mark it passed from a Node `npm start` run.
+`npm run test:exe` starts `companion/release/KIP-Bridge/KIP-Bridge.exe`. It does not run `npm start`. The smoke reads a join code from stdout, checks that `GET /api/status` omits that code and reports `playlink.bound: false`, fetches `/` and loopback `/host` (join code and an SVG), and binds UDP 9060 itself to prove the bridge has not opened it. It then kills the process tree and repeats the checks once. Build the folder with `npm run package:win` first. Both commands are Windows-only. `npm run verify` does not run them, so Ubuntu CI stays unchanged.
 
 ## Hardware
 
@@ -74,4 +72,4 @@ When an executable is produced, the smoke test must start it without a separate 
 
 ## This session
 
-2026-10-18: `npm test` 25/25, `npm run typecheck` passed, `npx playwright test` 18/18. Full `npm run verify` and `./gradlew test` were not run.
+2026-10-18 packaging pass: see `docs/TEST_RESULTS.md`. `./gradlew test` was not run. The Android tree was not edited.

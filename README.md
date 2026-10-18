@@ -1,5 +1,7 @@
 # Reverse of Power
 
+Android app, plus a Windows bridge so a phone browser can be the controller. The bridge lives in `companion/`. Build the portable folder with `cd companion` and `npm run package:win`. PlayStation play through that bridge is unverified until you test it on your own console. The Android app below is the original client.
+
 **Reverse of Power** is a free, open-source Android app that turns your phone or tablet into a controller for the PlayStation "PlayLink" party quiz games — an unofficial, community-built replacement for the original companion app, so the games stay playable now that the official app is no longer maintained.
 
 It speaks the game's local-network protocol directly: point it at a retail copy running on a stock PS4 or PS5 on the same Wi-Fi, and play exactly as the creators intended — pick categories, race through fastest-finger trivia, link and sort answers, and sabotage your friends with power plays.

@@ -19,9 +19,12 @@
     "test:e2e": "npm run build && playwright test",
     "test:e2e:install": "playwright install --with-deps chromium webkit",
     "verify": "node scripts/verify.mjs",
+    "package:win": "node scripts/package-win.mjs",
+    "test:exe": "node scripts/exe-smoke.mjs",
     "bridge:smoke": "node --experimental-strip-types scripts/bridge-smoke.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "^1.55.1"
+    "@playwright/test": "^1.55.1",
+    "esbuild": "^0.25.11"
   }
 }

@@ -8,7 +8,9 @@ The bridge listens on `0.0.0.0:8787`. The page and the socket share that origin.
 
 There is no CORS header. A public page is not a client. HTTP and the WebSocket both refuse a remote address that is not loopback, RFC1918, or link-local.
 
-`GET /api/status` reports `gameplay: true` and `controllerUi: true` for the controller export. `protocol` is true. `playlink.bound` is true only while a session holds UDP 9060. The join code is printed by `npm start` and is absent from this JSON.
+`GET /api/status` reports `gameplay: true` and `controllerUi: true` for the controller export. `protocol` is true. `playlink.bound` is true only while a session holds UDP 9060. The join code is printed at startup and is absent from this JSON.
+
+`GET /host` is the PC screen. It answers only when the request arrives on loopback. The HTML contains the join code and an SVG QR of each LAN URL (`http://<lan-ipv4>:8787/`). The QR does not contain the join code. Any other address gets 404. The page polls `/api/status` and that poll still omits the code. If no LAN address exists, the page says to type the PC address by hand and does not change Windows adapters.
 
 ## Join
 

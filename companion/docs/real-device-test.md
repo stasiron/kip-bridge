@@ -18,11 +18,10 @@ Default for every row below until someone fills results by hand: **UNVERIFIED**.
 ## Prerequisites (Windows)
 
 1. PS4 or PS5 + Knowledge Is Power (or Decades) on the same Wi‑Fi as the PC (not guest / client-isolation SSID).
-2. Node.js 22+ on the PC.
-3. From `companion/`: `npm install`, `npm run build`, then `scripts\start-bridge.cmd` (or `npm start`).
-4. Note the **Join code** and the printed `http://<lan-ip>:8787/` URL.
-5. Windows Firewall: allow Node.js on **Private** networks (TCP 8787; UDP 9060 after join).
-6. Optional QR: generate a QR of `http://<lan-ip>:8787/` with any local QR tool; phone must open that HTTP origin (not the Vercel HTTPS page) to play.
+2. Unzip `KIP-Bridge-windows.zip` and double-click `KIP-Bridge.exe`. Developers can instead use Node.js 22+ from `companion/` (`npm install`, `npm run build`, `npm start`).
+3. Note the **Join code** on the PC window. Scan the QR, or open the printed `http://<lan-ip>:8787/` URL. The phone must use that HTTP origin, not a public HTTPS page.
+4. Windows Firewall: allow the program on **Private** networks (TCP 8787; UDP 9060 after join).
+5. `GET /host` on the PC shows the join code. `GET /api/status` must not.
 
 Vercel hosts the launcher only. Safari blocks `wss`/`ws` to a LAN bridge from a public HTTPS page.
 

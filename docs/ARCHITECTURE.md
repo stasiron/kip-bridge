@@ -62,10 +62,20 @@ Verified means fixtures, Kotlin source, text traces, or the simulator. It does n
 | Screen lock on a physical iPhone still gets the timeout answer | Designed. Not run on a phone |
 | Decades needs a scheduled time-sync | Not shown. The bridge can forward `ClientToServerTimeSync` if the page sends it. It does not schedule one |
 
-## Packaging (not built)
+## Packaging
 
-The running bridge is `node --experimental-strip-types companion/bridge/src/index.ts`. It prints a join code and LAN URLs. It does not print a QR code.
+Developers still run `node --experimental-strip-types companion/bridge/src/index.ts`. That process prints the join code, each LAN URL, and an ASCII QR of the URL.
 
-The next build should package this same process so a nontechnical person does not install Node. Keep `ws` as the only runtime dependency. Do not rewrite the codec in another language for the sake of an executable. Node's single-executable application support is the smallest wrap, because the runtime is already Node 22+. Any QR library added later must be inspected for license (GPL-compatible) and behavior before it is committed. Generating the QR inside the process, with no new dependency, is preferable.
+`npm run package:win` (Windows only) writes `companion/release/KIP-Bridge/` and `companion/release/KIP-Bridge-windows.zip`. The folder contains:
 
-The executable still has to be allowed through the Windows firewall on private networks: TCP 8787, and UDP 9060 after join.
+- `KIP-Bridge.exe`, a small C# console launcher compiled with the .NET Framework `csc`. It sets `KIP_BRIDGE_LAUNCH=1` and starts `node.exe bridge.cjs` in the same folder.
+- `node.exe`, a private copy of the Node binary used at build time. The player does not install Node.
+- `bridge.cjs`, an esbuild bundle of the existing TypeScript bridge. The codec is not rewritten. Optional native `ws` addons stay external.
+- `web/`, a copy of the Next.js static export.
+- `LICENSE`, `NOTICE`, `NODE-LICENSE.txt`, and `README.txt`.
+
+A single Node SEA binary was not used. SEA plus a signed `node.exe` needs extra tooling, and a folder already carries the web assets. The zip is the distribution.
+
+`GET /host` answers only on loopback. It shows the join code and an SVG QR of each LAN URL. The QR encoder is in `bridge/src/qr.ts` (byte mode, ECC level L, versions 1–3). It has no npm dependency. `GET /api/status` still omits the join code.
+
+The player still has to allow the program through the Windows firewall on private networks: TCP 8787, and UDP 9060 after join. The program does not change adapter addresses.

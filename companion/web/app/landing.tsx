@@ -22,13 +22,10 @@ export function Landing() {
       <section className="border border-cyan-900/50 bg-slate-950/60 p-5">
         <h2 className="font-display text-xl font-semibold text-cyan-50">How to play</h2>
         <ol className="mt-4 list-decimal space-y-3 pl-5 text-slate-300">
-          <li>On a PC or Mac on the same Wi-Fi as the PlayStation, clone this repository and open <code className="font-mono text-teal-200">companion/</code>.</li>
-          <li>
-            Run <code className="font-mono text-teal-200">npm install</code>, <code className="font-mono text-teal-200">npm run build</code>, then{" "}
-            <code className="font-mono text-teal-200">npm start</code>.
-          </li>
-          <li>Copy the join code printed in the terminal. Open one of the printed <code className="font-mono text-teal-200">http://</code> LAN URLs in iPhone Safari.</li>
-          <li>Discover or type the console IP, enter the join code, set name and avatar, then play. The TV stays authoritative.</li>
+          <li>On a Windows PC on the same Wi-Fi as the PlayStation, start KIP-Bridge.exe from the portable folder. Node.js does not need to be installed.</li>
+          <li>Read the join code in that window. Scan the QR code, or type one of the printed http:// LAN addresses, in iPhone Safari or Android Chrome.</li>
+          <li>Enter the join code, discover or type the console IP, then set a name and avatar. The TV stays in charge of the game.</li>
+          <li>Developers can instead run npm install, npm run build, and npm start inside companion/.</li>
         </ol>
       </section>
 

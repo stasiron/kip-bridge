@@ -25,7 +25,7 @@ Delegate with the project subagents in `.cursor/agents/` when the task is large 
 - Gameplay stays on `http://<lan-ip>:8787` served by the bridge. A public HTTPS host cannot open the LAN socket. Do not add a database, account service, or cloud relay.
 - One local IPv4 plus UDP 9060 is one browser player. Do not multiplex two UIDs on one socket unless a new capture shows a non-zero `UDPPortOffset` and replies on `9060 + offset`.
 - Preserve existing work. Do not delete the Vercel launcher, the Android tree, or traces in `docs/` because a later phase prefers a local-only setup.
-- Do not initialize a git repo, force-push, or publish unless the user asks.
+- A local git repository may exist. Do not push, add a remote, or publish unless the user asks.
 
 ## Verify
 
