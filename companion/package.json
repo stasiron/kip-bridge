@@ -20,7 +20,7 @@
     "test:e2e:install": "playwright install --with-deps chromium webkit",
     "verify": "node scripts/verify.mjs",
     "package:win": "node scripts/package-win.mjs",
-    "test:exe": "node scripts/exe-smoke.mjs",
+    "test:exe": "node --experimental-strip-types scripts/exe-smoke.mjs",
     "bridge:smoke": "node --experimental-strip-types scripts/bridge-smoke.mjs"
   },
   "devDependencies": {

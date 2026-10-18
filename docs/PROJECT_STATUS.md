@@ -40,13 +40,13 @@ Node v24.15.0, from `companion/`. Counts are in `docs/TEST_RESULTS.md`.
 
 | Command | Result |
 | --- | --- |
-| `npm test` | 29 passed, 0 failed |
-| `npm run typecheck` | Passed (web and bridge) |
-| `npx playwright test` | 20 passed, 0 failed (Chromium and WebKit, 27.5s) |
+| `npm test` | 30 passed, 0 failed |
+| `npm run typecheck` | Passed inside `npm run verify` |
+| `npx playwright test` | 20 passed, 0 failed (Chromium and WebKit, 27.1s) |
 | `npm run package:win` | Wrote `companion/release/KIP-Bridge/` and `KIP-Bridge-windows.zip` |
 | `npm run test:exe` | Packaged exe served `/`, `/host`, and `/api/status`. UDP 9060 stayed free. Restart passed |
 
-`npm run verify` was green before the packaging edits (25 tests, 18 Playwright). It was not repeated after those edits because it does not build the exe. The commands above cover the same checks plus the new host tests, the Decades Playwright case, and the exe smoke.
+`npm run verify` passed on this tree: 30 unit tests, 20 Playwright tests, and the development-server smoke. It does not start `KIP-Bridge.exe`. `npm run test:exe` did, with PATH limited to `C:\Windows\System32`.
 
 ## Not done, and not treated as broken tests
 

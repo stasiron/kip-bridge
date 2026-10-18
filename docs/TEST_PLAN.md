@@ -64,7 +64,7 @@ Required flows: status flags, join, name, avatar, lobby, holding, continue, cate
 
 ## Windows executable
 
-`npm run test:exe` starts `companion/release/KIP-Bridge/KIP-Bridge.exe`. It does not run `npm start`. The smoke reads a join code from stdout, checks that `GET /api/status` omits that code and reports `playlink.bound: false`, fetches `/` and loopback `/host` (join code and an SVG), and binds UDP 9060 itself to prove the bridge has not opened it. It then kills the process tree and repeats the checks once. Build the folder with `npm run package:win` first. Both commands are Windows-only. `npm run verify` does not run them, so Ubuntu CI stays unchanged.
+`npm run test:exe` starts `companion/release/KIP-Bridge/KIP-Bridge.exe` with a PATH that cannot find a system Node. It does not run `npm start`. The smoke checks that the child process is the folder's `node.exe`, reads a join code from stdout, checks that `GET /api/status` omits that code, fetches `/`, and checks that loopback `/host` contains `qrSvg` for each printed LAN URL. A request to `/host` on a LAN address must be 404 and must not contain the code. A wrong join code returns `bad_join_code` and leaves UDP 9060 free. A valid code against `ConsoleSimulator` assigns a player, carries a trivia question to the WebSocket, and carries the answer back to the simulator. The process tree is then killed and the checks run once more. Build the folder with `npm run package:win` first. Both commands are Windows-only. `npm run verify` does not run them, so Ubuntu CI stays unchanged.
 
 ## Hardware
 

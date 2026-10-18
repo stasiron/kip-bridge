@@ -39,11 +39,11 @@ export class ConsoleSimulator {
     this.port = port;
   }
 
-  static listen(): Promise<ConsoleSimulator> {
+  static listen(host = "127.0.0.1"): Promise<ConsoleSimulator> {
     const socket = dgram.createSocket({ type: "udp4" });
     return new Promise((resolve, reject) => {
       socket.once("error", reject);
-      socket.bind(0, "127.0.0.1", () => {
+      socket.bind(0, host, () => {
         socket.off("error", reject);
         const address = socket.address();
         const sim = new ConsoleSimulator(socket, address.port);

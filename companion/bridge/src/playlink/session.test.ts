@@ -4,6 +4,7 @@ import type http from "node:http";
 import test, { describe } from "node:test";
 import { DDP_PS4_VERSION } from "../config.ts";
 import { isLocalNetworkAddress } from "./access.ts";
+import { playerIpv4Addresses } from "./pool.ts";
 import { discoverConsoles, discoverySearch, parseDiscoveryResponse } from "./discovery.ts";
 import { ConsoleSimulator } from "./simulator.ts";
 import { createBridge } from "../server.ts";
@@ -68,6 +69,20 @@ function bridgeOptions(endpoints: string[], extra: Record<string, unknown> = {})
     ...extra,
   };
 }
+
+test("player addresses skip loopback, public, and CGNAT ranges", () => {
+  assert.deepEqual(
+    playerIpv4Addresses([
+      { family: "IPv4", internal: true, address: "127.0.0.1" },
+      { family: "IPv4", internal: false, address: "100.76.200.123" },
+      { family: "IPv4", internal: false, address: "8.8.8.8" },
+      { family: "IPv4", internal: false, address: "192.168.0.18" },
+      { family: "IPv4", internal: false, address: "172.20.240.1" },
+      { family: "IPv6", internal: false, address: "fe80::1" },
+    ]),
+    ["192.168.0.18", "172.20.240.1"],
+  );
+});
 
 test("private-network checks reject public addresses", () => {
   assert.equal(isLocalNetworkAddress("8.8.8.8"), false);

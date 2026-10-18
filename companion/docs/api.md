@@ -63,7 +63,7 @@ The same UID and console, on a new socket, receive `bridge.snapshot` and keep th
 | `bad_uid` | UID is not 32 hex characters |
 | `bad_console_address` | Host is not a private IPv4 address, or the port is out of range |
 | `not_private_network` | The TCP peer is not on the local network |
-| `no_lan_address` | The process has no non-loopback IPv4 address. Tests pass addresses explicitly |
+| `no_lan_address` | The process has no private non-loopback IPv4 address. CGNAT addresses such as 100.64.0.0/10 are not used. Tests pass addresses explicitly |
 | `endpoint_exhausted` | Every pooled address already has a session |
 | `udp_bind_failed` | 9060 is taken on that address. The pool slot is released |
 | `connect_timeout` | No connection ack. The session closes and the address is released |

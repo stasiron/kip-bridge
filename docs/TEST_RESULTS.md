@@ -8,13 +8,13 @@ These results use `ConsoleSimulator` or the packaged process talking to itself. 
 
 | Command | Result |
 | --- | --- |
-| `npm test` | 29 passed, 0 failed, 0 skipped. Duration 3664.8108 ms. `--test-concurrency=1`. |
-| `npm run typecheck` | Passed. `tsc --noEmit` in `kip-browser-web` and `kip-browser-bridge`. |
-| `npx playwright test` | 20 passed, 0 failed. 10 Chromium and 10 WebKit (iPhone 13). Duration 27.5s. One worker. |
-| `npm run package:win` | Exit 0. Folder `companion/release/KIP-Bridge`. Launcher `KIP-Bridge.exe` is 5120 bytes. Zip `companion/release/KIP-Bridge-windows.zip` is 34823115 bytes. |
-| `npm run test:exe` | Exit 0. First start join code `YKESMMP5`. After kill and restart, join code `26KUWY49`. Both times `/` and loopback `/host` returned 200, `/api/status` omitted the code and reported `playlink.bound` false, and a separate socket could bind UDP 9060. |
+| `npm run verify` | Exit 0. Typecheck, lint (`tsc`), 30 unit tests (3721.2083 ms), production build, 20 Playwright tests (27.1s), and development-server smoke on port 49237. |
+| `npm test` | Included above: 30 passed, 0 failed, 0 skipped. |
+| `npx playwright test` | Included above: 20 passed, 0 failed. 10 Chromium and 10 WebKit. |
+| `npm run package:win` | Exit 0. Folder `companion/release/KIP-Bridge`. Launcher `KIP-Bridge.exe` is 5120 bytes. Zip `companion/release/KIP-Bridge-windows.zip` is 34823154 bytes. |
+| `npm run test:exe` | Exit 0. PATH was only `C:\Windows\System32`. Child runtime was `companion/release/KIP-Bridge/node.exe`. Start join code `8TQR4EDZ`, restart join code `K2S2P7DT`. Each run checked HTTP `/`, loopback `/host` QR for 2 private URLs, LAN `/host` 404 without the code, a rejected join code with UDP 9060 still free, then a valid join against `ConsoleSimulator`: player 1, a trivia question on the WebSocket, and the answer back on UDP. |
 
-`npm run verify` passed earlier the same day, before the host page, QR, Decades Playwright case, and Windows package. That run was typecheck, 25 unit tests, the Next.js export, 18 Playwright tests, and the development-server smoke. It was not repeated after those edits. `npm run verify` does not build or start `KIP-Bridge.exe`.
+`npm run verify` does not build or start `KIP-Bridge.exe`. The exe smoke is the separate Windows command above.
 
 `./gradlew test` was not run. The Android tree was not edited. No `.pcapng` files are in the tree, so `tshark` replay was not run.
 
@@ -25,7 +25,7 @@ These results use `ConsoleSimulator` or the packaged process talking to itself. 
 - One address rejects a second UID with `endpoint_exhausted`. `127.0.0.1` and `127.0.0.2` isolate two simulated players. That is not a PlayStation multiplayer result. See `companion/docs/multiplayer.md`.
 - Trivia, power play, resources, images, missing ACK, NACK, probe retry, connect timeout, and same-UID reattach.
 - Playwright: setup, lobby, classic screens, Decades ordering, eliminating, missing letter, and matching, bad join code, two browsers, disconnect and reconnect, visibility reconnect, connect timeout, and a narrow mobile viewport. Chromium and WebKit.
-- Packaged exe startup, static page, loopback host QR, status without the join code, free UDP 9060, and one restart.
+- Packaged exe with no Node on PATH: private `node.exe`, HTTP page, loopback QR, join code hidden from LAN `/host` and `/api/status`, rejected join, simulator assignment, trivia question and answer, UDP 9060 free before join and after exit, and one restart.
 
 ## What they do not cover
 

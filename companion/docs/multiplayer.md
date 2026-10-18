@@ -19,7 +19,7 @@ A second source port, a second UID on the same socket, or a second WebSocket on 
 
 ## What the bridge does
 
-`PlayLinkSession.open` binds the receive socket to `localAddress:9060` and the send socket to `localAddress:0`. `EndpointPool` gives each session a distinct address. A second UID, when every address is in use, gets `endpoint_exhausted`. The first session stays up.
+`PlayLinkSession.open` binds the receive socket to `localAddress:9060` and the send socket to `localAddress:0`. `EndpointPool` gives each session a distinct address from `lanIpv4Addresses()`. That list is non-loopback private IPv4 only. Loopback, public addresses, and shared CGNAT space such as `100.64.0.0/10` are left out, because the HTTP guard rejects them and a console on the home LAN cannot answer them. A virtual adapter in RFC1918 space, such as a Hyper-V switch, can still appear. The phone must use an address it can actually route to. A second UID, when every address is in use, gets `endpoint_exhausted`. The first session stays up.
 
 `session.test.ts` covers that refusal, and it covers `127.0.0.1` and `127.0.0.2` receiving different player ids and different console messages. That is isolation inside the simulator. It is not a PlayStation result.
 
