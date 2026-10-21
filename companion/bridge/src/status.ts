@@ -6,11 +6,15 @@ import {
   REFERENCE_REPOSITORY,
   SESSION_PATH,
 } from "./config.ts";
+import type { PoolDiagnostics } from "./playlink/pool.ts";
+import type { UpdateStatus } from "./update/manager.ts";
 
 export interface StatusInput {
   activeSessions?: number;
   endpointCount?: number;
   freeEndpoints?: number;
+  endpoints?: PoolDiagnostics;
+  update?: UpdateStatus;
 }
 
 /**
@@ -19,6 +23,7 @@ export interface StatusInput {
  */
 export function bridgeStatus(input: StatusInput = {}) {
   const activeSessions = input.activeSessions ?? 0;
+  const diag = input.endpoints;
   return {
     service: "kip-browser-bridge" as const,
     gameplay: true as const,
@@ -39,11 +44,15 @@ export function bridgeStatus(input: StatusInput = {}) {
       active: activeSessions,
       endpoints: input.endpointCount ?? 0,
       free: input.freeEndpoints ?? 0,
+      playable: diag?.playable ?? [],
+      used: diag?.used ?? [],
+      skippedLinkLocal: diag?.skippedLinkLocal ?? [],
     },
     reference: {
       repository: REFERENCE_REPOSITORY,
       commit: REFERENCE_COMMIT,
     },
+    update: input.update,
   };
 }
 

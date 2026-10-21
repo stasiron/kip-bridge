@@ -106,7 +106,7 @@ function broadcastTargets(): { host: string; port: number; version: string }[] {
   const hosts = new Set<string>(["255.255.255.255"]);
   for (const entries of Object.values(os.networkInterfaces())) {
     for (const entry of entries ?? []) {
-      if (entry.family !== "IPv4" || entry.internal || !entry.netmask) continue;
+      if ((entry.family !== "IPv4" && (entry.family as string | number) !== 4) || entry.internal || !entry.netmask) continue;
       const broadcast = broadcastAddress(entry.address, entry.netmask);
       if (broadcast) hosts.add(broadcast);
     }

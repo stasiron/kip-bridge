@@ -75,6 +75,19 @@ copyTree(webOut, path.join(outDir, "web"));
 fs.copyFileSync(process.execPath, path.join(outDir, "node.exe"));
 fs.copyFileSync(path.join(root, "LICENSE"), path.join(outDir, "LICENSE"));
 fs.copyFileSync(path.join(root, "NOTICE"), path.join(outDir, "NOTICE"));
+fs.copyFileSync(path.join(root, "scripts", "update-apply.cjs"), path.join(outDir, "update-apply.cjs"));
+fs.writeFileSync(
+  path.join(outDir, "VERSION.txt"),
+  `${process.env.KIP_BRIDGE_VERSION ?? "1.0.2"}\n`,
+  "utf8",
+);
+const updateOwner = process.env.KIP_UPDATE_OWNER ?? "";
+const updateRepo = process.env.KIP_UPDATE_REPO ?? "";
+fs.writeFileSync(
+  path.join(outDir, "update-config.json"),
+  `${JSON.stringify({ owner: updateOwner, repo: updateRepo, publicKeySpkiB64: process.env.KIP_UPDATE_PUBLIC_KEY_SPKI_B64 ?? null }, null, 2)}\n`,
+  "utf8",
+);
 
 const nodeLicense = path.join(path.dirname(process.execPath), "LICENSE");
 if (fs.existsSync(nodeLicense)) fs.copyFileSync(nodeLicense, path.join(outDir, "NODE-LICENSE.txt"));
@@ -82,23 +95,37 @@ if (fs.existsSync(nodeLicense)) fs.copyFileSync(nodeLicense, path.join(outDir, "
 console.log("Compiling KIP-Bridge.exe...");
 const launcherExe = path.join(outDir, "KIP-Bridge.exe");
 const tempExe = path.join(os.tmpdir(), "KIP-Bridge-launcher.exe");
-run(csc, ["/nologo", "/target:exe", `/out:${tempExe}`, path.join(root, "scripts", "launcher.cs")], root);
+run(csc, [
+  "/nologo",
+  "/target:winexe",
+  "/r:System.Windows.Forms.dll",
+  "/r:System.Drawing.dll",
+  `/out:${tempExe}`,
+  path.join(root, "scripts", "launcher.cs"),
+], root);
 fs.copyFileSync(tempExe, launcherExe);
 
-const readme = `Knowledge Is Power browser bridge
-GPL-3.0-only. Not affiliated with Sony Interactive Entertainment or Wish Studios.
+const readme = `Knowledge Is Power — most na PC
+GPL-3.0-only. Nie jest powiązany z Sony Interactive Entertainment ani Wish Studios.
 
-Play on a real PlayStation is UNVERIFIED until you try it yourself.
+Gra na prawdziwej PlayStation jest UNVERIFIED, dopóki sam tego nie sprawdzisz.
 
-Start
-1. Unzip this folder. Keep every file together.
-2. Double-click KIP-Bridge.exe. Do not install Node.js.
-3. If Windows Firewall asks, allow it on Private networks.
-4. Read the join code in the window. Scan a QR code with the phone, or type the http:// address.
-5. On the phone, enter the join code and the PlayStation IP (or press Discover).
-6. Close the window to stop. UDP port 9060 opens only after a valid join.
+Start (bez programowania)
+1. Rozpakuj cały folder. Nie wyciągaj samego pliku exe.
+2. Kliknij dwukrotnie KIP-Bridge.exe. Nie instaluj Node.js.
+3. Okno pokaże kod. Przeglądarka otworzy stronę z QR (http://127.0.0.1:8787/host).
+4. Jeśli Windows Firewall zapyta — zezwól na sieci prywatne (Private).
+5. Telefon: ten sam Wi‑Fi co konsola. Zeskanuj QR albo wpisz adres http:// z strony hosta.
+6. Na telefonie wpisz kod i IP PlayStation (albo Discover).
+7. Wyłącz: przycisk Wyłącz albo zamknij okno mostu. Port UDP 9060 otwiera się dopiero po poprawnym dołączeniu.
 
-One PC address can carry one browser player. A second phone needs a second IPv4 address on the PC. This program does not change Windows network settings.
+Jeden adres IPv4 na PC = jeden gracz w przeglądarce. Drugi telefon wymaga drugiego adresu IPv4 na PC. Ten program nie zmienia ustawień sieci Windows.
+
+Aktualizacje: strona hosta (Check for Updates). Pobieranie tylko po Update Now. Wymaga publicznego GitHub Release z podpisanym manifestem — patrz companion/docs/updates.md.
+
+English
+Double-click KIP-Bridge.exe. Allow Private networks if Windows asks. Read the join code in the app or on http://127.0.0.1:8787/host. Press Wyłącz (Stop) or close the window to stop.
+Updates never download until you confirm on the host page.
 
 Source for this build is the companion directory in the project that created the zip, plus Reverse of Power commit e9543047cd73cd93e1cbc59313a91f0f2c0f68cc (${repoRoot}).
 The private node.exe runtime is covered by NODE-LICENSE.txt.

@@ -13,7 +13,9 @@ export function lanHttpUrls(port: number): string[] {
   const urls: string[] = [];
   for (const entries of Object.values(os.networkInterfaces())) {
     for (const entry of entries ?? []) {
-      if (entry.family === "IPv4" && !entry.internal) urls.push(`http://${entry.address}:${port}/`);
+      if ((entry.family === "IPv4" || (entry.family as string | number) === 4) && !entry.internal) {
+        urls.push(`http://${entry.address}:${port}/`);
+      }
     }
   }
   return urls;
@@ -23,5 +25,13 @@ const invokedDirectly =
   typeof process.argv[1] === "string" && path.resolve(process.argv[1]) === path.resolve(import.meta.filename);
 
 if (invokedDirectly || process.env.KIP_BRIDGE_LAUNCH === "1") {
-  void runBridge(createBridge(), HTTP_HOST, HTTP_PORT);
+  const installDir = path.dirname(path.resolve(import.meta.filename));
+  void runBridge(
+    createBridge({
+      installDir,
+      disableUpdateCheck: process.env.KIP_UPDATE_DISABLE === "1",
+    }),
+    HTTP_HOST,
+    HTTP_PORT,
+  );
 }

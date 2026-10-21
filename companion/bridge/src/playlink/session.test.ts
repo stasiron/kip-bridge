@@ -4,7 +4,7 @@ import type http from "node:http";
 import test, { describe } from "node:test";
 import { DDP_PS4_VERSION } from "../config.ts";
 import { isLocalNetworkAddress } from "./access.ts";
-import { playerIpv4Addresses } from "./pool.ts";
+import { EndpointPool, playerIpv4Addresses, sameIpv4Slash24 } from "./pool.ts";
 import { discoverConsoles, discoverySearch, parseDiscoveryResponse } from "./discovery.ts";
 import { ConsoleSimulator } from "./simulator.ts";
 import { createBridge } from "../server.ts";
@@ -66,22 +66,42 @@ function bridgeOptions(endpoints: string[], extra: Record<string, unknown> = {})
     connectTimeoutMs: 1200,
     ackTimeoutMs: 300,
     detachGraceMs: 250,
+    disableUpdateCheck: true,
     ...extra,
   };
 }
 
-test("player addresses skip loopback, public, and CGNAT ranges", () => {
+test("player addresses skip loopback, public, CGNAT, and link-local", () => {
   assert.deepEqual(
     playerIpv4Addresses([
       { family: "IPv4", internal: true, address: "127.0.0.1" },
       { family: "IPv4", internal: false, address: "100.76.200.123" },
       { family: "IPv4", internal: false, address: "8.8.8.8" },
+      { family: "IPv4", internal: false, address: "169.254.10.20" },
       { family: "IPv4", internal: false, address: "192.168.0.18" },
       { family: "IPv4", internal: false, address: "172.20.240.1" },
       { family: "IPv6", internal: false, address: "fe80::1" },
+      { family: 4, internal: false, address: "192.168.1.140" },
     ]),
-    ["192.168.0.18", "172.20.240.1"],
+    ["192.168.0.18", "172.20.240.1", "192.168.1.140"],
   );
+});
+
+test("endpoint pool ranks preferred and console subnet, resyncs, and releases", () => {
+  const pool = new EndpointPool(["172.29.80.1", "192.168.1.140", "10.0.0.5"]);
+  assert.equal(sameIpv4Slash24("192.168.1.140", "192.168.1.20"), true);
+  assert.equal(pool.acquire({ preferred: "192.168.1.140", consoleHost: "192.168.1.20" }), "192.168.1.140");
+  assert.equal(pool.free(), 2);
+  // No preferred match left; 10/8 scores above Hyper-V 172.16/12.
+  assert.equal(pool.acquire({ consoleHost: "192.168.1.20" }), "10.0.0.5");
+  pool.release("192.168.1.140");
+  assert.equal(pool.free(), 2);
+  pool.resync(["192.168.1.140", "192.168.1.141"]);
+  assert.equal(pool.size, 2);
+  assert.equal(pool.isUsed("10.0.0.5"), false);
+  assert.equal(pool.acquire({ preferred: "192.168.1.141" }), "192.168.1.141");
+  assert.equal(pool.acquire(), "192.168.1.140");
+  assert.equal(pool.acquire(), null);
 });
 
 test("private-network checks reject public addresses", () => {
@@ -183,6 +203,65 @@ describe("playlink sessions", { concurrency: false }, () => {
       await waitFor(() => frames.some((frame) => frame.code === "endpoint_exhausted"), "endpoint exhausted");
       assert.deepEqual(sim.addresses(), ["127.0.0.1"]);
       assert.equal(sim.client("127.0.0.1")?.playerId, 1);
+    } finally {
+      await bridge.close();
+      await sim.close();
+    }
+  });
+
+  test("bind failure on the first address tries the next and releases the failed slot", async () => {
+    const blocker = dgram.createSocket({ type: "udp4", reuseAddr: false });
+    await new Promise<void>((resolve, reject) => {
+      blocker.once("error", reject);
+      blocker.bind(9060, "127.0.0.1", () => resolve());
+    });
+    const sim = await ConsoleSimulator.listen();
+    const bridge = createBridge(bridgeOptions(["127.0.0.1", "127.0.0.2"]));
+    const port = await listen(bridge.server);
+    try {
+      const { frames } = await join(port, UID_A, sim.port);
+      assert.equal(frames.find((frame) => frame.connection === "assigned")?.localAddress, "127.0.0.2");
+      const status = await (await fetch(`http://127.0.0.1:${port}/api/status`)).json();
+      assert.equal(status.sessions.active, 1);
+      assert.equal(status.sessions.free, 1);
+      assert.deepEqual(status.sessions.used, ["127.0.0.2"]);
+    } finally {
+      await bridge.close();
+      await sim.close();
+      await new Promise<void>((resolve) => blocker.close(() => resolve()));
+    }
+  });
+
+  test("disconnect releases the endpoint for a later player", async () => {
+    const sim = await ConsoleSimulator.listen();
+    const bridge = createBridge(bridgeOptions(["127.0.0.1"]));
+    const port = await listen(bridge.server);
+    try {
+      const first = await join(port, UID_A, sim.port);
+      first.ws.send(JSON.stringify({ type: "bridge.disconnect" }));
+      await waitFor(() => first.frames.some((frame) => frame.connection === "closed"), "disconnect");
+      await waitFor(async () => {
+        const body = await (await fetch(`http://127.0.0.1:${port}/api/status`)).json();
+        return body.sessions.free === 1 && body.playlink.bound === false;
+      }, "endpoint free after disconnect");
+      const second = await join(port, UID_B, sim.port);
+      assert.equal(second.frames.find((frame) => frame.connection === "assigned")?.localAddress, "127.0.0.1");
+    } finally {
+      await bridge.close();
+      await sim.close();
+    }
+  });
+
+  test("empty endpoint list returns no_lan_address, not endpoint_exhausted", async () => {
+    const sim = await ConsoleSimulator.listen();
+    const bridge = createBridge(bridgeOptions([]));
+    const port = await listen(bridge.server);
+    try {
+      const ws = await openSocket(port);
+      const frames = framesOf(ws);
+      ws.send(JSON.stringify({ type: "bridge.join", code: "TABLE01", uid: UID_A, consoleHost: "127.0.0.1", consolePort: sim.port }));
+      await waitFor(() => frames.some((frame) => frame.code === "no_lan_address"), "no lan address");
+      assert.equal(frames.some((frame) => frame.code === "endpoint_exhausted"), false);
     } finally {
       await bridge.close();
       await sim.close();

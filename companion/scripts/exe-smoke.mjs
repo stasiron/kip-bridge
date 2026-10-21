@@ -25,30 +25,64 @@ function fail(message) {
 if (!fs.existsSync(exe)) fail(`Missing ${exe}. Run npm run package:win first.`);
 if (!fs.existsSync(bundledNode)) fail(`Missing ${bundledNode}. The folder must carry its own Node runtime.`);
 
+async function waitForHostPage() {
+  const started = Date.now();
+  let lastError = "";
+  while (Date.now() - started < 25_000) {
+    try {
+      const host = await fetch(`http://127.0.0.1:${port}/host`);
+      const html = await host.text();
+      const match = html.match(/class="code">([A-Z2-9]{8})</);
+      if (host.status === 200 && match) {
+        const urls = [...html.matchAll(/class="url">(http:\/\/\d+\.\d+\.\d+\.\d+:8787\/)</g)].map((m) => m[1]);
+        return { code: match[1], urls, html };
+      }
+      lastError = `HTTP ${host.status}`;
+    } catch (error) {
+      lastError = error instanceof Error ? error.message : String(error);
+    }
+    await new Promise((resolve) => setTimeout(resolve, 200));
+  }
+  throw new Error(`timed out waiting for the host page (${lastError})`);
+}
+
 function launch() {
   const child = spawn(exe, [], {
     cwd: folder,
     env: { ...process.env, PATH: "C:\\Windows\\System32" },
+    stdio: "ignore",
+    windowsHide: true,
   });
-  let output = "";
-  child.stdout.setEncoding("utf8");
-  child.stderr.setEncoding("utf8");
   const ready = new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`timed out waiting for the join code\n${output}`)), 25_000);
-    const onData = (chunk) => {
-      output += chunk;
-      const match = output.match(/Join code: ([A-Z2-9]{8})/);
-      if (match && output.includes("Close this window to stop the bridge.")) {
-        clearTimeout(timer);
-        resolve({ code: match[1], output });
+    let settled = false;
+    const timer = setTimeout(() => {
+      if (!settled) {
+        settled = true;
+        reject(new Error("timed out waiting for the host page"));
       }
-    };
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
+    }, 25_000);
     child.on("exit", (code) => {
-      clearTimeout(timer);
-      reject(new Error(`launcher exited ${code} before printing a join code\n${output}`));
+      if (!settled) {
+        settled = true;
+        clearTimeout(timer);
+        reject(new Error(`launcher exited ${code} before the host page was ready`));
+      }
     });
+    waitForHostPage()
+      .then((page) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          resolve(page);
+        }
+      })
+      .catch((error) => {
+        if (!settled) {
+          settled = true;
+          clearTimeout(timer);
+          reject(error);
+        }
+      });
   });
   return { child, ready };
 }
@@ -127,7 +161,7 @@ async function checkOnce(label) {
   const sim = await ConsoleSimulator.listen("0.0.0.0");
   const { child, ready } = launch();
   try {
-    const { code, output } = await ready;
+    const { code, urls, html: hostHtml } = await ready;
     const runtime = await childNodePath(child.pid);
     if (path.resolve(runtime).toLowerCase() !== path.resolve(bundledNode).toLowerCase()) {
       fail(`${label}: bridge runtime is ${runtime || "(none)"}, expected ${bundledNode}`);
@@ -146,13 +180,8 @@ async function checkOnce(label) {
     const html = await page.text();
     if (page.status !== 200 || !html.includes("<html")) fail(`${label}: controller page did not load`);
 
-    const urls = [...output.matchAll(/http:\/\/(\d+\.\d+\.\d+\.\d+):8787\//g)]
-      .map((match) => match[0])
-      .filter((url) => !url.startsWith("http://127.0.0.1:"));
-    if (urls.length === 0) fail(`${label}: no LAN URL in the banner\n${output}`);
-    const host = await fetch(`http://127.0.0.1:${port}/host`);
-    const hostHtml = await host.text();
-    if (host.status !== 200 || !hostHtml.includes(code)) fail(`${label}: loopback host page missing the join code`);
+    if (urls.length === 0) fail(`${label}: no LAN URL on the host page`);
+    if (!hostHtml.includes(code)) fail(`${label}: loopback host page missing the join code`);
     for (const url of urls) {
       const svg = qrSvg(url);
       if (!hostHtml.includes(svg)) fail(`${label}: host QR does not encode ${url}`);
@@ -162,7 +191,7 @@ async function checkOnce(label) {
     const consoleHost = urls
       .map((url) => url.slice("http://".length).split(":")[0])
       .find((address) => isLocalNetworkAddress(address));
-    if (!consoleHost) fail(`${label}: no private IPv4 in the banner\n${output}`);
+    if (!consoleHost) fail(`${label}: no private IPv4 on the host page`);
     const hidden = await fetch(`http://${consoleHost}:${port}/host`);
     const hiddenText = await hidden.text();
     if (hidden.status !== 404) fail(`${label}: /host on ${consoleHost} returned ${hidden.status}`);

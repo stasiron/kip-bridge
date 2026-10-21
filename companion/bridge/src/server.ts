@@ -2,16 +2,17 @@ import { randomInt, timingSafeEqual } from "node:crypto";
 import fs from "node:fs";
 import http from "node:http";
 import { WebSocketServer, type WebSocket } from "ws";
-import { PLAYLINK_SERVER_PORT, SESSION_PATH } from "./config.ts";
+import { PLAYLINK_CLIENT_PORT, PLAYLINK_SERVER_PORT, SESSION_PATH } from "./config.ts";
 import { renderHostPage } from "./host-page.ts";
-import { isDottedIpv4, isLocalNetworkAddress, isLoopbackAddress } from "./playlink/access.ts";
+import { isDottedIpv4, isLocalNetworkAddress, isLoopbackAddress, normalizeIp } from "./playlink/access.ts";
 import { discoverConsoles } from "./playlink/discovery.ts";
-import { EndpointPool, lanIpv4Addresses } from "./playlink/pool.ts";
+import { EndpointPool, lanIpv4Addresses, type PoolDiagnostics } from "./playlink/pool.ts";
 import { PlayLinkSession, type SessionEvent } from "./playlink/session.ts";
 import { MESSAGE_CATALOG } from "./protocol/catalog.ts";
 import { MESSAGE_FIELDS } from "./protocol/schema.ts";
 import { bridgeStatus, type BridgeStatus } from "./status.ts";
 import { contentType, resolveStatic } from "./static-files.ts";
+import { UpdateManager } from "./update/manager.ts";
 import { resolveWebRoot } from "./web-root.ts";
 
 const PORTRAIT_LIMIT = 400_000;
@@ -26,11 +27,16 @@ export interface BridgeOptions {
   detachGraceMs?: number;
   discoverTimeoutMs?: number;
   webRoot?: string;
+  /** Skip background GitHub check (tests). */
+  disableUpdateCheck?: boolean;
+  updateManager?: UpdateManager;
+  installDir?: string;
 }
 
 export interface BridgeHandle {
   server: http.Server;
   joinCode: string;
+  updates: UpdateManager;
   close: () => Promise<void>;
 }
 
@@ -48,21 +54,48 @@ export function createJoinCode(): string {
 }
 
 export function createBridge(options: BridgeOptions = {}): BridgeHandle {
-  const endpoints = options.endpoints ?? lanIpv4Addresses();
-  const pool = new EndpointPool(endpoints);
+  const fixedEndpoints = options.endpoints;
+  const pool = new EndpointPool(fixedEndpoints ?? lanIpv4Addresses());
   const webOut = options.webRoot ?? resolveWebRoot();
   const joinCode = options.joinCode ?? createJoinCode();
   const sessions = new Map<string, ManagedSession>();
   const socketSession = new WeakMap<WebSocket, ManagedSession>();
+  const socketLocalAddress = new WeakMap<WebSocket, string>();
   let joinChain: Promise<void> = Promise.resolve();
   let activeSessions = 0;
+  let lastPoolLog = "";
+  const updates =
+    options.updateManager ??
+    new UpdateManager({
+      installDir: options.installDir,
+      activeSessions: () => activeSessions,
+    });
 
-  const status = (): BridgeStatus =>
-    bridgeStatus({
+  const refreshPool = (): PoolDiagnostics => {
+    if (!fixedEndpoints) pool.resync(lanIpv4Addresses());
+    const diag = pool.diagnostics();
+    const summary = `playable=${diag.playable.join(",") || "-"} used=${diag.used.join(",") || "-"} free=${diag.free.join(",") || "-"} skippedLinkLocal=${diag.skippedLinkLocal.join(",") || "-"}`;
+    if (!fixedEndpoints && summary !== lastPoolLog) {
+      lastPoolLog = summary;
+      console.log(`[playlink] endpoints ${summary}`);
+    }
+    return diag;
+  };
+
+  const status = (): BridgeStatus => {
+    const diag = refreshPool();
+    return bridgeStatus({
       activeSessions,
       endpointCount: pool.size,
       freeEndpoints: pool.free(),
+      endpoints: diag,
+      update: updates.status(),
     });
+  };
+
+  if (!options.disableUpdateCheck) {
+    void updates.checkInBackground();
+  }
 
   const server = http.createServer((req, res) => {
     const remote = req.socket.remoteAddress ?? "";
@@ -73,6 +106,10 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
     const url = new URL(req.url ?? "/", "http://127.0.0.1");
     if (req.method === "GET" && url.pathname === "/api/status") {
       sendJson(res, 200, status());
+      return;
+    }
+    if (isLoopbackAddress(remote) && url.pathname.startsWith("/api/update")) {
+      void handleUpdateApi(req, res, url.pathname);
       return;
     }
     if ((req.method === "GET" || req.method === "HEAD") && url.pathname === "/host") {
@@ -140,7 +177,9 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
     });
   });
 
-  sockets.on("connection", (ws: WebSocket) => {
+  sockets.on("connection", (ws: WebSocket, req) => {
+    const local = normalizeIp(req.socket.localAddress ?? "");
+    if (isDottedIpv4(local)) socketLocalAddress.set(ws, local);
     send(ws, { type: "bridge.status", ...status() });
     ws.on("message", (data) => {
       void onClientMessage(ws, data.toString());
@@ -227,54 +266,94 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
       send(ws, snapshot(existing.session));
       return;
     }
-    if (endpoints.length === 0) {
-      send(ws, { type: "bridge.error", code: "no_lan_address", detail: "the bridge has no non-loopback IPv4 address" });
-      return;
-    }
-    const localAddress = pool.acquire();
-    if (!localAddress) {
+
+    const diag = refreshPool();
+    if (pool.size === 0) {
+      const skipped = diag.skippedLinkLocal.length
+        ? ` link-local skipped: ${diag.skippedLinkLocal.join(", ")}.`
+        : "";
       send(ws, {
         type: "bridge.error",
-        code: "endpoint_exhausted",
-        detail: "every local IPv4 address already has a PlayLink session on UDP 9060",
+        code: "no_lan_address",
+        detail: `the bridge has no RFC1918 IPv4 address for PlayLink UDP 9060.${skipped} Connect this PC to the same Wi-Fi as the PlayStation, then join again.`,
       });
       return;
     }
-    const session = new PlayLinkSession({
-      uid,
-      localAddress,
-      consoleHost: frame.consoleHost,
-      consolePort,
-      probeIntervalMs: options.probeIntervalMs,
-      connectTimeoutMs: options.connectTimeoutMs,
-      ackTimeoutMs: options.ackTimeoutMs,
-    });
-    const managed: ManagedSession = {
-      session,
-      sockets: new Set([ws]),
-      consoleHost: frame.consoleHost,
-      consolePort,
-      retired: false,
-      detachTimer: null,
-    };
-    session.onEvent = (event) => publish(managed, event);
-    sessions.set(uid, managed);
-    socketSession.set(ws, managed);
-    activeSessions += 1;
-    try {
-      await session.open();
-    } catch (error) {
-      await session.close();
-      send(ws, {
-        type: "bridge.error",
-        code: "udp_bind_failed",
-        detail: error instanceof Error ? error.message : String(error),
+
+    const preferred = socketLocalAddress.get(ws);
+    const failedBinds = new Set<string>();
+    let lastBindError = "";
+
+    while (true) {
+      const localAddress = pool.acquire({
+        preferred,
+        consoleHost: frame.consoleHost,
+        exclude: failedBinds,
       });
+      if (!localAddress) {
+        if (failedBinds.size > 0) {
+          send(ws, {
+            type: "bridge.error",
+            code: "udp_bind_failed",
+            detail: lastBindError || `UDP 9060 could not bind on any host address (tried ${[...failedBinds].join(", ")})`,
+          });
+          return;
+        }
+        send(ws, {
+          type: "bridge.error",
+          code: "endpoint_exhausted",
+          detail: `every local IPv4 address already has a PlayLink session on UDP 9060 (${diag.used.join(", ") || "none free"}; free=${pool.free()})`,
+        });
+        return;
+      }
+
+      console.log(
+        `[playlink] join uid=${uid.slice(0, 8)}… allocate ${localAddress} preferred=${preferred ?? "-"} console=${frame.consoleHost}`,
+      );
+
+      const session = new PlayLinkSession({
+        uid,
+        localAddress,
+        consoleHost: frame.consoleHost,
+        consolePort,
+        probeIntervalMs: options.probeIntervalMs,
+        connectTimeoutMs: options.connectTimeoutMs,
+        ackTimeoutMs: options.ackTimeoutMs,
+      });
+      const managed: ManagedSession = {
+        session,
+        sockets: new Set([ws]),
+        consoleHost: frame.consoleHost,
+        consolePort,
+        retired: false,
+        detachTimer: null,
+      };
+      session.onEvent = (event) => publish(managed, event);
+      sessions.set(uid, managed);
+      socketSession.set(ws, managed);
+      activeSessions += 1;
+      try {
+        await session.open();
+      } catch (error) {
+        lastBindError = error instanceof Error ? error.message : String(error);
+        console.log(`[playlink] bind failed on ${localAddress}: ${lastBindError}`);
+        failedBinds.add(localAddress);
+        await abandonJoin(managed);
+        continue;
+      }
+      if (ws.readyState !== ws.OPEN) {
+        console.log(`[playlink] socket closed during open on ${localAddress}; releasing`);
+        await abandonJoin(managed);
+        return;
+      }
+      console.log(`[playlink] listening on ${localAddress}:${PLAYLINK_CLIENT_PORT}`);
       return;
     }
-    if (ws.readyState !== ws.OPEN) {
-      await session.close();
-    }
+  }
+
+  async function abandonJoin(managed: ManagedSession): Promise<void> {
+    await managed.session.close();
+    if (!managed.retired) retire(managed);
   }
 
   function command(ws: WebSocket, message: unknown): void {
@@ -393,6 +472,39 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
     for (const socket of managed.sockets) socketSession.delete(socket);
   }
 
+  async function handleUpdateApi(req: http.IncomingMessage, res: http.ServerResponse, pathname: string): Promise<void> {
+    try {
+      if (req.method === "GET" && pathname === "/api/update") {
+        sendJson(res, 200, updates.status());
+        return;
+      }
+      if (req.method === "POST" && pathname === "/api/update/check") {
+        sendJson(res, 200, await updates.check());
+        return;
+      }
+      if (req.method === "POST" && pathname === "/api/update/later") {
+        sendJson(res, 200, updates.later());
+        return;
+      }
+      if (req.method === "POST" && pathname === "/api/update/download") {
+        const body = await readJsonBody(req);
+        sendJson(res, 200, await updates.download(body.confirm === true));
+        return;
+      }
+      if (req.method === "POST" && pathname === "/api/update/install") {
+        const body = await readJsonBody(req);
+        sendJson(res, 200, await updates.install(body.confirm === true));
+        return;
+      }
+      sendJson(res, 404, { error: "not_found" });
+    } catch (error) {
+      sendJson(res, 500, {
+        error: "update_api_failed",
+        detail: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+
   let socketsClosed = false;
   const closeSockets = () => {
     if (socketsClosed) return;
@@ -404,6 +516,7 @@ export function createBridge(options: BridgeOptions = {}): BridgeHandle {
   return {
     server,
     joinCode,
+    updates,
     close: async () => {
       for (const managed of [...sessions.values()]) {
         if (managed.detachTimer) clearTimeout(managed.detachTimer);
@@ -488,6 +601,39 @@ function sendJson(res: http.ServerResponse, statusCode: number, body: unknown): 
     "X-Content-Type-Options": "nosniff",
   });
   res.end(payload);
+}
+
+function readJsonBody(req: http.IncomingMessage): Promise<Record<string, unknown>> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+    let size = 0;
+    req.on("data", (chunk: Buffer) => {
+      size += chunk.length;
+      if (size > 64_000) {
+        reject(new Error("body too large"));
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+    req.on("end", () => {
+      if (chunks.length === 0) {
+        resolve({});
+        return;
+      }
+      try {
+        const parsed = JSON.parse(Buffer.concat(chunks).toString("utf8")) as unknown;
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          reject(new Error("JSON object required"));
+          return;
+        }
+        resolve(parsed as Record<string, unknown>);
+      } catch (error) {
+        reject(error);
+      }
+    });
+    req.on("error", reject);
+  });
 }
 
 function locateFile(root: string, urlPath: string): string | null {

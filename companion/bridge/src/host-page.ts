@@ -85,9 +85,23 @@ export function renderHostPage(input: HostPageInput): string {
       <h2>Connection</h2>
       <p id="udp">${bound ? "A phone has joined. UDP 9060 is open toward the console." : "UDP 9060 is closed until a phone joins with this code."}</p>
       <p id="sessions">${input.status.sessions.active} player session(s). ${input.status.sessions.free} of ${input.status.sessions.endpoints} host address(es) still free.</p>
-      <p>One host IPv4 address can carry one browser player. A second phone needs a second address on this PC. This program will not change Windows network settings.</p>
+      <p id="playable">PlayLink addresses: ${(input.status.sessions.playable ?? []).join(", ") || "(none)"}</p>
+      <p>One host IPv4 address can carry one browser player. A second phone needs a second address on this PC (see docs/multiplayer.md). This program will not change Windows network settings without your consent.</p>
       <p>If Discover finds nothing, type the PlayStation IP on the phone. Real console play is still unverified until you try it on your own PS4 or PS5.</p>
-      <p>Close this window's console to stop the bridge. Allow the app on private networks if Windows Firewall asks (TCP 8787, and UDP 9060 after a join).</p>
+      <p>Press Wyłącz (Stop) in the bridge app, or close that window, to stop. Allow the app on private networks if Windows Firewall asks (TCP 8787, and UDP 9060 after a join).</p>
+    </section>
+    <section class="card" id="updates">
+      <h2>Updates</h2>
+      <p>Version <span id="appVersion">…</span></p>
+      <p id="updateStatus">Checking is optional. Updates never download until you press Update Now.</p>
+      <p id="updateDetail"></p>
+      <div id="updateActions" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+        <button type="button" id="checkUpdates">Check for Updates</button>
+        <button type="button" id="updateNow" hidden>Update Now</button>
+        <button type="button" id="updateLater" hidden>Later</button>
+        <button type="button" id="installUpdate" hidden>Install &amp; Restart</button>
+      </div>
+      <progress id="updateProgress" max="100" value="0" hidden style="width:100%;margin-top:8px"></progress>
     </section>
   </main>
   <script>
@@ -99,8 +113,67 @@ export function renderHostPage(input: HostPageInput): string {
         : "UDP 9060 is closed until a phone joins with the code on this page.";
       document.getElementById("sessions").textContent =
         body.sessions.active + " player session(s). " + body.sessions.free + " of " + body.sessions.endpoints + " host address(es) still free.";
+      document.getElementById("playable").textContent =
+        "PlayLink addresses: " + ((body.sessions.playable && body.sessions.playable.length) ? body.sessions.playable.join(", ") : "(none)");
+      if (body.update) renderUpdate(body.update);
     }
+    function renderUpdate(update) {
+      document.getElementById("appVersion").textContent = update.currentVersion || "unknown";
+      const status = document.getElementById("updateStatus");
+      const detail = document.getElementById("updateDetail");
+      const updateNow = document.getElementById("updateNow");
+      const updateLater = document.getElementById("updateLater");
+      const installUpdate = document.getElementById("installUpdate");
+      const progress = document.getElementById("updateProgress");
+      updateNow.hidden = true;
+      updateLater.hidden = true;
+      installUpdate.hidden = true;
+      progress.hidden = true;
+      if (update.state === "available") {
+        status.textContent = "KIP-Bridge Update Available";
+        detail.textContent = "Current version: " + update.currentVersion + " — New version: " + update.availableVersion + (update.releaseNotes ? " — " + update.releaseNotes : "");
+        updateNow.hidden = false;
+        updateLater.hidden = false;
+      } else if (update.state === "downloading") {
+        status.textContent = "Downloading update…";
+        detail.textContent = update.availableVersion || "";
+        progress.hidden = false;
+        progress.value = update.progressPercent || 0;
+      } else if (update.state === "ready") {
+        status.textContent = update.sessionsActive
+          ? "Update downloaded. Waiting until no PlayLink session is active."
+          : "Update verified. Install when ready.";
+        detail.textContent = update.availableVersion || "";
+        installUpdate.hidden = !!update.sessionsActive;
+      } else if (update.state === "error") {
+        status.textContent = "Update check failed";
+        detail.textContent = update.error || "unknown error";
+      } else if (update.state === "up_to_date") {
+        status.textContent = "Up to date";
+        detail.textContent = "";
+      } else {
+        status.textContent = "Updates never download until you press Update Now.";
+        detail.textContent = update.error || "";
+      }
+    }
+    document.getElementById("checkUpdates").onclick = async () => {
+      await fetch("/api/update/check", { method: "POST" });
+      await tick();
+    };
+    document.getElementById("updateNow").onclick = async () => {
+      await fetch("/api/update/download", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: true }) });
+      await tick();
+    };
+    document.getElementById("updateLater").onclick = async () => {
+      await fetch("/api/update/later", { method: "POST" });
+      await tick();
+    };
+    document.getElementById("installUpdate").onclick = async () => {
+      await fetch("/api/update/install", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ confirm: true }) });
+      await tick();
+    };
     setInterval(tick, 2000);
+    tick();
   </script>
 </body>
 </html>`;

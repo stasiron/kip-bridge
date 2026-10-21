@@ -68,7 +68,7 @@ Developers still run `node --experimental-strip-types companion/bridge/src/index
 
 `npm run package:win` (Windows only) writes `companion/release/KIP-Bridge/` and `companion/release/KIP-Bridge-windows.zip`. The folder contains:
 
-- `KIP-Bridge.exe`, a small C# console launcher compiled with the .NET Framework `csc`. It sets `KIP_BRIDGE_LAUNCH=1` and starts `node.exe bridge.cjs` in the same folder.
+- `KIP-Bridge.exe`, a small C# WinForms host compiled with the .NET Framework `csc` (`/target:winexe`). It auto-starts on open, sets `KIP_BRIDGE_LAUNCH=1`, starts `node.exe bridge.cjs`, shows the join code, opens the loopback host page, and kills the process tree on Stop or close (job object + `taskkill /T`).
 - `node.exe`, a private copy of the Node binary used at build time. The player does not install Node.
 - `bridge.cjs`, an esbuild bundle of the existing TypeScript bridge. The codec is not rewritten. Optional native `ws` addons stay external.
 - `web/`, a copy of the Next.js static export.

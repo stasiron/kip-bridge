@@ -16,16 +16,18 @@ npm install
 npm run package:win
 ```
 
-2. Unzip `companion/release/KIP-Bridge-windows.zip`, or open the folder `companion/release/KIP-Bridge`.
-3. Double-click `KIP-Bridge.exe`.
+2. Unzip `companion/release/KIP-Bridge-windows.zip`, or open the folder `companion/release/KIP-Bridge`. Keep every file together.
+3. Double-click `KIP-Bridge.exe`. The app starts the bridge and opens `http://127.0.0.1:8787/host` in the browser.
 4. If Windows Firewall asks, allow it on **Private** networks (TCP **8787**, and UDP **9060** after a phone joins).
-5. Read the **join code** in the window. Scan a QR code with the phone, or type one of the `http://` addresses into Safari or Chrome.
+5. Read the **join code** in the app (or on the host page). Scan a QR with the phone, or type one of the `http://` addresses into Safari or Chrome.
 6. On the phone, enter the join code. Discover the console, or type its IP (Settings, Network). Pick a name and an avatar.
-7. Close the bridge window to stop. UDP 9060 stays closed until the join code is accepted.
+7. Press **Wyłącz** (Stop) or close the app window to stop. UDP 9060 stays closed until the join code is accepted.
 
-The QR code contains only the page URL. The join code is printed on the PC and on `http://127.0.0.1:8787/host`. It is not in `GET /api/status`.
+The QR code contains only the page URL. The join code stays on the PC app and on `http://127.0.0.1:8787/host`. It is not in `GET /api/status`.
 
 One PC IPv4 address can carry one browser player. A second phone needs another address on the PC. This program does not change Windows network settings. Details: `docs/multiplayer.md`.
+
+Optional updates: open `http://127.0.0.1:8787/host` → Check for Updates. Nothing downloads until **Update Now**. Needs a configured public GitHub Release repo and signed manifests (`docs/updates.md`).
 
 Guest Wi-Fi and client isolation hide the PC from the phone. Wake a sleeping console, then type its IP if Discover stays empty.
 

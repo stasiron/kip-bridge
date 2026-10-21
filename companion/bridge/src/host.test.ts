@@ -30,7 +30,7 @@ test("QR matrix has finder cores and a quiet-sized version for a LAN URL", () =>
 });
 
 test("host page shows the join code and status JSON does not", async () => {
-  const bridge = createBridge({ endpoints: ["127.0.0.1"], joinCode: JOIN });
+  const bridge = createBridge({ endpoints: ["127.0.0.1"], joinCode: JOIN, disableUpdateCheck: true });
   await listenBridge(bridge, "127.0.0.1", 0);
   const port = (bridge.server.address() as AddressInfo).port;
   try {
@@ -38,8 +38,9 @@ test("host page shows the join code and status JSON does not", async () => {
     const statusText = await status.text();
     assert.equal(status.status, 200);
     assert.equal(statusText.includes(JOIN), false);
-    const parsed = JSON.parse(statusText) as { playlink: { bound: boolean } };
+    const parsed = JSON.parse(statusText) as { playlink: { bound: boolean }; update?: { currentVersion: string } };
     assert.equal(parsed.playlink.bound, false);
+    assert.ok(parsed.update?.currentVersion);
 
     const host = await fetch(`http://127.0.0.1:${port}/host`);
     const html = await host.text();
@@ -47,6 +48,7 @@ test("host page shows the join code and status JSON does not", async () => {
     assert.equal(html.includes(JOIN), true);
     assert.equal(html.includes("<svg"), true);
     assert.equal(html.includes("UDP 9060 is closed"), true);
+    assert.equal(html.includes("Check for Updates"), true);
 
     const page = await fetch(`http://127.0.0.1:${port}/`);
     const pageHtml = await page.text();
@@ -70,10 +72,10 @@ test("host page shows the join code and status JSON does not", async () => {
 });
 
 test("a taken HTTP port is reported without changing network settings", async () => {
-  const first = createBridge({ endpoints: ["127.0.0.1"], joinCode: JOIN });
+  const first = createBridge({ endpoints: ["127.0.0.1"], joinCode: JOIN, disableUpdateCheck: true });
   await listenBridge(first, "127.0.0.1", 0);
   const port = (first.server.address() as AddressInfo).port;
-  const second = createBridge({ endpoints: ["127.0.0.1"], joinCode: "ZZZZZZZZ" });
+  const second = createBridge({ endpoints: ["127.0.0.1"], joinCode: "ZZZZZZZZ", disableUpdateCheck: true });
   try {
     await assert.rejects(() => listenBridge(second, "127.0.0.1", port), (error: NodeJS.ErrnoException) => {
       assert.equal(error.code, "EADDRINUSE");

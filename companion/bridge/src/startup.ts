@@ -58,7 +58,7 @@ export function printStartupBanner(bridge: BridgeHandle, port: number): void {
   }
   console.log("If the phone cannot find the console, type the PlayStation IP.");
   console.log("PlayStation compatibility is unverified until you test on your own console.");
-  console.log("Close this window to stop the bridge.");
+  console.log("Press Stop in the bridge app, or close that window, to stop.");
   console.log("");
 }
 

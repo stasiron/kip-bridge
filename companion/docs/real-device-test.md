@@ -18,7 +18,7 @@ Default for every row below until someone fills results by hand: **UNVERIFIED**.
 ## Prerequisites (Windows)
 
 1. PS4 or PS5 + Knowledge Is Power (or Decades) on the same Wi‑Fi as the PC (not guest / client-isolation SSID).
-2. Unzip `KIP-Bridge-windows.zip` and double-click `KIP-Bridge.exe`. Developers can instead use Node.js 22+ from `companion/` (`npm install`, `npm run build`, `npm start`).
+2. Unzip `KIP-Bridge-windows.zip` and double-click `KIP-Bridge.exe` (WinForms host: auto-starts, opens `/host`, Stop/close kills the bridge). Developers can instead use Node.js 22+ from `companion/` (`npm install`, `npm run build`, `npm start`).
 3. Note the **Join code** on the PC window. Scan the QR, or open the printed `http://<lan-ip>:8787/` URL. The phone must use that HTTP origin, not a public HTTPS page.
 4. Windows Firewall: allow the program on **Private** networks (TCP 8787; UDP 9060 after join).
 5. `GET /host` on the PC shows the join code. `GET /api/status` must not.
