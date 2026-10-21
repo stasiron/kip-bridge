@@ -12,16 +12,14 @@ The client does **not** contain a GitHub personal access token. Public repositor
 
 ## Configure the release repository
 
-This workspace often has no git remote. Set the public repo that will host Releases:
+Default release repo is `stasiron/kip-bridge`. Override with:
 
 ```text
 KIP_UPDATE_OWNER=your-github-user
 KIP_UPDATE_REPO=your-repo
 ```
 
-Bake them into a package with the same env vars when running `npm run package:win`. They are written to `update-config.json` for operators. Runtime also reads `KIP_UPDATE_OWNER` / `KIP_UPDATE_REPO`.
-
-Until both are set, the host page reports `not_configured` and continues normally.
+Bake overrides into a package with the same env vars when running `npm run package:win`. They are written to `update-config.json`. Runtime also reads those env vars.
 
 ## Publisher signing key
 

@@ -3,17 +3,14 @@
  *
  * Public repos work with anonymous API calls. Private repos need a token on a
  * machine the publisher controls — never ship a personal access token inside
- * the client. Set KIP_UPDATE_OWNER and KIP_UPDATE_REPO before publishing.
- *
- * This workspace has no git remote by default. Until those env vars (or a
- * packaged update-config.json) name a public release repo, checks stay idle.
+ * the client. Override owner/repo via env or packaged update-config.json.
  */
 
 /** Semver of this build. Bump when packaging a release. */
-export const APP_VERSION = "1.0.2";
+export const APP_VERSION = "1.0.3";
 
-export const DEFAULT_UPDATE_OWNER = process.env.KIP_UPDATE_OWNER ?? "";
-export const DEFAULT_UPDATE_REPO = process.env.KIP_UPDATE_REPO ?? "";
+export const DEFAULT_UPDATE_OWNER = process.env.KIP_UPDATE_OWNER ?? "stasiron";
+export const DEFAULT_UPDATE_REPO = process.env.KIP_UPDATE_REPO ?? "kip-bridge";
 
 /**
  * SPKI DER (base64) ed25519 public key that must sign release manifests.
